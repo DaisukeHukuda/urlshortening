@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="ja">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>URL短縮 管理</title>
+    <link rel="stylesheet" href="/styles.css" />
+  </head>
+  <body>
+    <main>
+      <h1>URL短縮 管理</h1>
+
+      <section id="login-view">
+        <form id="login-form">
+          <label>合言葉
+            <input type="password" id="passphrase" autocomplete="current-password" required />
+          </label>
+          <button type="submit">ログイン</button>
+          <p class="error" id="login-error" hidden>合言葉が違います</p>
+        </form>
+      </section>
+
+      <section id="app-view" hidden>
+        <form id="create-form">
+          <label>リンク先URL
+            <input type="url" id="target-url" placeholder="https://example.com" required />
+          </label>
+          <label>タイトル（任意）
+            <input type="text" id="title" />
+          </label>
+          <label>カスタムコード（任意）
+            <input type="text" id="custom-code" placeholder="例: sale（英数・-・_、32文字まで）" />
+          </label>
+          <label>有効期限（任意）
+            <input type="datetime-local" id="expires-at" />
+          </label>
+          <button type="submit">短縮URLを作成</button>
+          <p class="error" id="create-error" hidden></p>
+        </form>
+
+        <h2>作成済みリンク</h2>
+        <table id="links-table">
+          <thead>
+            <tr><th>短縮URL</th><th>リンク先</th><th>状態</th><th>クリック</th><th></th></tr>
+          </thead>
+          <tbody id="links-body"></tbody>
+        </table>
+
+        <section id="edit-view" hidden>
+          <button id="edit-back" type="button">← 一覧に戻る</button>
+          <h2 id="edit-title"></h2>
+          <form id="edit-form">
+            <input type="hidden" id="edit-code" />
+            <label>リンク先URL
+              <input type="url" id="edit-target" required />
+            </label>
+            <label>タイトル
+              <input type="text" id="edit-title-input" />
+            </label>
+            <label>有効期限（空で無期限）
+              <input type="datetime-local" id="edit-expires" />
+            </label>
+            <label class="checkbox">
+              <input type="checkbox" id="edit-disabled" /> 無効化する
+            </label>
+            <button type="submit">保存</button>
+            <p class="error" id="edit-error" hidden></p>
+          </form>
+        </section>
+
+        <div id="qr-modal" hidden>
+          <div class="qr-box">
+            <button id="qr-close" type="button">✕</button>
+            <h3 id="qr-title"></h3>
+            <div id="qr-canvas"></div>
+          </div>
+        </div>
+
+        <section id="stats-view" hidden>
+          <button id="stats-back" type="button">← 一覧に戻る</button>
+          <h2 id="stats-title"></h2>
+          <p class="stats-total">総クリック数: <strong id="stats-total">0</strong></p>
+
+          <h3>日別クリック</h3>
+          <div id="chart-byday" class="chart"></div>
+
+          <div class="breakdowns">
+            <div><h3>国</h3><div id="bk-country" class="bars"></div></div>
+            <div><h3>流入元</h3><div id="bk-referer" class="bars"></div></div>
+            <div><h3>デバイス</h3><div id="bk-device" class="bars"></div></div>
+            <div><h3>OS</h3><div id="bk-os" class="bars"></div></div>
+            <div><h3>ブラウザ</h3><div id="bk-browser" class="bars"></div></div>
+          </div>
+        </section>
+      </section>
+    </main>
+    <script src="/vendor/qrcode.min.js"></script>
+    <script src="/app.js"></script>
+  </body>
+</html>
