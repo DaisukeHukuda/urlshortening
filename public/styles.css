@@ -35,6 +35,10 @@
   font-weight: var(--weight-semibold);
   letter-spacing: -0.01em;
   color: var(--fg-primary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  min-width: 0;
 }
 .appbar__name span { color: var(--fg-tertiary); font-weight: var(--weight-regular); }
 .appbar__spacer { flex: 1; }
@@ -363,6 +367,9 @@
   gap: var(--space-4);
 }
 .linkcard__top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
+.linkcard__top .linkcard__row { min-width: 0; }
+.linkcard__top .badge { flex: none; }
+.linkcard .shorturl { white-space: normal; word-break: break-all; }
 .linkcard__row { display: flex; flex-direction: column; gap: 3px; }
 .linkcard__lbl { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg-quaternary); }
 .linkcard__val { font-size: var(--type-body-sm-size); color: var(--fg-secondary); word-break: break-all; }
@@ -570,4 +577,5 @@
   .cardlist { display: flex; }
   .stat-hero__num { font-size: 48px; }
   .page__title { font-size: var(--type-title-2-size); }
+  .appbar__meta { display: none; }
 }
