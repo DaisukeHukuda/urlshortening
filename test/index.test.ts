@@ -12,7 +12,7 @@ beforeEach(async () => {
 });
 
 describe("worker fetch routing", () => {
-  it("routes /api/* to the API (returns the links list)", async () => {
+  it("routes /api/* to the API (returns 401 without auth)", async () => {
     const ctx = createExecutionContext();
     const res = await worker.fetch(
       new Request("http://x/api/links"),
@@ -20,13 +20,11 @@ describe("worker fetch routing", () => {
       ctx,
     );
     await waitOnExecutionContext(ctx);
-    expect(res.status).toBe(200);
-    const body = (await res.json()) as { links: unknown[] };
-    expect(Array.isArray(body.links)).toBe(true);
+    expect(res.status).toBe(401);
   });
 
   it("routes a single-segment GET to the redirect handler", async () => {
-    const link = await createLink(env.DB, "https://example.com/", null, 1);
+    const link = await createLink(env.DB, "https://example.com/", null, 1, undefined, undefined, 1);
     const ctx = createExecutionContext();
     const res = await worker.fetch(
       new Request(`http://x/${link.code}`),

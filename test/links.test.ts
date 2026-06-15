@@ -37,9 +37,9 @@ describe("createLink / getLink / listLinks", () => {
   });
 
   it("lists links newest first", async () => {
-    await createLink(env.DB, "https://a.com", null, 100);
-    await createLink(env.DB, "https://b.com", null, 200);
-    const links = await listLinks(env.DB);
+    await createLink(env.DB, "https://a.com", null, 100, undefined, undefined, 1);
+    await createLink(env.DB, "https://b.com", null, 200, undefined, undefined, 1);
+    const links = await listLinks(env.DB, 1);
     expect(links).toHaveLength(2);
     expect(links[0].target_url).toBe("https://b.com");
     expect(links[1].target_url).toBe("https://a.com");

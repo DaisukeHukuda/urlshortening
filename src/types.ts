@@ -1,6 +1,7 @@
 export interface Env {
   DB: D1Database;
   ASSETS: Fetcher;
+  AUTH_SECRET: string;
 }
 
 export interface LinkRow {
@@ -11,4 +12,5 @@ export interface LinkRow {
   click_count: number;
   expires_at: number | null;
   disabled: number;
+  user_id: number | null;
 }

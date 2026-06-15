@@ -36,14 +36,16 @@ export async function createLink(
   now: number,
   code?: string,
   expiresAt?: number | null,
+  userId?: number,
 ): Promise<LinkRow> {
   const exp = expiresAt ?? null;
+  const uid = userId ?? null;
   const insert = (c: string) =>
     db
       .prepare(
-        "INSERT INTO links (code, target_url, title, created_at, click_count, expires_at, disabled) VALUES (?, ?, ?, ?, 0, ?, 0)",
+        "INSERT INTO links (code, target_url, title, created_at, click_count, expires_at, disabled, user_id) VALUES (?, ?, ?, ?, 0, ?, 0, ?)",
       )
-      .bind(c, targetUrl, title, now, exp)
+      .bind(c, targetUrl, title, now, exp, uid)
       .run();
 
   if (code !== undefined) {
@@ -62,6 +64,7 @@ export async function createLink(
       click_count: 0,
       expires_at: exp,
       disabled: 0,
+      user_id: uid,
     };
   }
 
@@ -77,6 +80,7 @@ export async function createLink(
         click_count: 0,
         expires_at: exp,
         disabled: 0,
+        user_id: uid,
       };
     } catch (e) {
       if (String(e).includes("UNIQUE")) continue;
@@ -92,18 +96,19 @@ export async function getLink(
 ): Promise<LinkRow | null> {
   const row = await db
     .prepare(
-      "SELECT code, target_url, title, created_at, click_count, expires_at, disabled FROM links WHERE code = ?",
+      "SELECT code, target_url, title, created_at, click_count, expires_at, disabled, user_id FROM links WHERE code = ?",
     )
     .bind(code)
     .first<LinkRow>();
   return row ?? null;
 }
 
-export async function listLinks(db: D1Database): Promise<LinkRow[]> {
+export async function listLinks(db: D1Database, userId: number): Promise<LinkRow[]> {
   const { results } = await db
     .prepare(
-      "SELECT code, target_url, title, created_at, click_count, expires_at, disabled FROM links ORDER BY created_at DESC",
+      "SELECT code, target_url, title, created_at, click_count, expires_at, disabled, user_id FROM links WHERE user_id = ? ORDER BY created_at DESC",
     )
+    .bind(userId)
     .all<LinkRow>();
   return results ?? [];
 }

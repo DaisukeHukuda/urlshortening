@@ -18,7 +18,7 @@ function reqWith(headers: Record<string, string>): Request {
 
 describe("handleRedirect", () => {
   it("302-redirects, increments click_count, and records a click event", async () => {
-    const link = await createLink(env.DB, "https://example.com/", null, 1);
+    const link = await createLink(env.DB, "https://example.com/", null, 1, undefined, undefined, 1);
 
     const ctx = createExecutionContext();
     const res = await handleRedirect(
@@ -61,7 +61,7 @@ describe("handleRedirect", () => {
   });
 
   it("records referer as 'direct' when there is no Referer header", async () => {
-    const link = await createLink(env.DB, "https://example.com/", null, 1);
+    const link = await createLink(env.DB, "https://example.com/", null, 1, undefined, undefined, 1);
     const ctx = createExecutionContext();
     await handleRedirect(reqWith({}), link.code, env, ctx);
     await waitOnExecutionContext(ctx);
@@ -89,7 +89,7 @@ describe("handleRedirect", () => {
 
 describe("handleRedirect disabled / expired", () => {
   it("returns 410 for a disabled link and records no click", async () => {
-    await createLink(env.DB, "https://example.com/", null, 1, "dis1");
+    await createLink(env.DB, "https://example.com/", null, 1, "dis1", undefined, 1);
     await env.DB.prepare("UPDATE links SET disabled = 1 WHERE code = ?")
       .bind("dis1")
       .run();
@@ -109,7 +109,7 @@ describe("handleRedirect disabled / expired", () => {
 
   it("returns 410 for an expired link", async () => {
     // expires in the past
-    await createLink(env.DB, "https://example.com/", null, 1, "exp1", 1000);
+    await createLink(env.DB, "https://example.com/", null, 1, "exp1", 1000, 1);
 
     const ctx = createExecutionContext();
     const res = await handleRedirect(reqWith({}), "exp1", env, ctx);

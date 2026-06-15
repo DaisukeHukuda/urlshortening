@@ -65,11 +65,40 @@
   /* ---- view switching ------------------------------------------------- */
   var page = $("page");
   function showView(name) {
-    ["list", "stats", "edit"].forEach(function (v) {
+    ["auth", "list", "stats", "edit"].forEach(function (v) {
       $("view-" + v).hidden = v !== name;
     });
     page.classList.toggle("page--narrow", name === "edit");
     window.scrollTo(0, 0);
+  }
+
+  /* ---- auth state ----------------------------------------------------- */
+  var authMode = "login";
+
+  function setAuthed(user) {
+    $("appbar-user").hidden = false;
+    $("appbar-username").textContent = user.username;
+    showView("list");
+    loadLinks();
+  }
+
+  function setLoggedOut() {
+    $("appbar-user").hidden = true;
+    setAuthMode("login");
+    showView("auth");
+  }
+
+  function setAuthMode(mode) {
+    authMode = mode;
+    var login = mode === "login";
+    $("auth-title").textContent = login ? "ログイン" : "新規登録";
+    $("auth-sub").textContent = login ? "アカウントにログインしてください。" : "新しいアカウントを作成します。";
+    $("auth-submit").textContent = login ? "ログイン" : "登録してはじめる";
+    $("auth-toggle-text").textContent = login ? "アカウントをお持ちでないですか？" : "すでにアカウントをお持ちですか？";
+    $("auth-toggle").textContent = login ? "新規登録" : "ログイン";
+    $("auth-pw-hint").hidden = login;
+    $("auth-password").setAttribute("autocomplete", login ? "current-password" : "new-password");
+    $("auth-error").hidden = true;
   }
 
   /* ---- list rendering ------------------------------------------------- */
@@ -141,8 +170,11 @@
 
   function loadLinks() {
     return fetch("/api/links")
-      .then(function (r) { return r.ok ? r.json() : { links: [] }; })
-      .then(function (data) { renderList(data.links || []); })
+      .then(function (r) {
+        if (r.status === 401) { setLoggedOut(); return null; }
+        return r.ok ? r.json() : { links: [] };
+      })
+      .then(function (data) { if (data) renderList(data.links || []); })
       .catch(function () {});
   }
 
@@ -257,6 +289,8 @@
     else if (act === "delete") deleteLinkUi(code);
     else if (act === "back-list") showView("list");
     else if (act === "qr-close") closeQr();
+    else if (act === "auth-toggle") { setAuthMode(authMode === "login" ? "register" : "login"); }
+    else if (act === "logout") { fetch("/api/logout", { method: "POST" }).then(setLoggedOut); }
   });
 
   document.addEventListener("keydown", function (e) {
@@ -282,6 +316,37 @@
       }
       return r.json().catch(function () { return {}; }).then(function (b) {
         showFormError(err, CREATE_ERR[b.error] || "作成に失敗しました。");
+      });
+    });
+  });
+
+  var AUTH_ERR = {
+    "invalid_credentials": "ユーザーIDまたはパスワードが違います。",
+    "username_taken": "そのユーザーIDは既に使われています。",
+    "invalid_username": "ユーザーIDは英数・_.- の3〜32文字で入力してください。",
+    "invalid_password": "パスワードは8文字以上で入力してください。"
+  };
+
+  $("auth-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var authErr = $("auth-error");
+    clearFormError(authErr);
+    var username = $("auth-username").value.trim();
+    var password = $("auth-password").value;
+    var url = authMode === "login" ? "/api/login" : "/api/register";
+    fetch(url, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ username: username, password: password })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (b) {
+        if (r.ok) {
+          setAuthed(b.user);
+        } else {
+          var msg = AUTH_ERR[b.error] ||
+            (authMode === "login" ? "ログインに失敗しました。" : "登録に失敗しました。");
+          showFormError(authErr, msg);
+        }
       });
     });
   });
@@ -318,5 +383,7 @@
     el.innerHTML = I[el.getAttribute("data-icon")] || "";
   });
   $("appbar-host").textContent = location.host;
-  loadLinks();
+  fetch("/api/me").then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
+    if (d && d.user) { setAuthed(d.user); } else { setLoggedOut(); }
+  });
 })();

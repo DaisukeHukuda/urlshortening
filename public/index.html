@@ -15,9 +15,36 @@
         <div class="appbar__name">Yamamotoya URL Shortening Tool</div>
         <div class="appbar__spacer"></div>
         <div class="appbar__meta" id="appbar-host"></div>
+        <div class="appbar__user" id="appbar-user" hidden><span class="appbar__username" id="appbar-username"></span><button class="iconbtn" type="button" data-act="logout">ログアウト</button></div>
       </header>
 
       <main class="page" id="page">
+        <!-- ============ AUTH VIEW ============ -->
+        <section id="view-auth" hidden>
+          <div class="authwrap">
+            <div class="card createform authcard">
+              <h1 class="authcard__title" id="auth-title">ログイン</h1>
+              <p class="authcard__sub" id="auth-sub">アカウントにログインしてください。</p>
+              <form id="auth-form" novalidate>
+                <div class="formgrid" style="grid-template-columns:1fr;gap:18px">
+                  <div class="field">
+                    <label class="label" for="auth-username">ユーザーID<span class="req">必須</span></label>
+                    <input class="input" id="auth-username" autocomplete="username" required />
+                  </div>
+                  <div class="field">
+                    <label class="label" for="auth-password">パスワード<span class="req">必須</span></label>
+                    <input class="input" id="auth-password" type="password" autocomplete="current-password" required />
+                    <span class="hint" id="auth-pw-hint" hidden>8文字以上</span>
+                  </div>
+                </div>
+                <div class="form-error" id="auth-error" hidden><span data-icon="alert"></span><span class="form-error__msg"></span></div>
+                <div class="form-actions" style="margin-top:24px"><button type="submit" class="btn btn--primary btn--block" id="auth-submit">ログイン</button></div>
+              </form>
+              <p class="authcard__toggle"><span id="auth-toggle-text">アカウントをお持ちでないですか？</span> <button type="button" class="linkbtn" data-act="auth-toggle" id="auth-toggle">新規登録</button></p>
+            </div>
+          </div>
+        </section>
+
         <!-- ============ LIST VIEW ============ -->
         <section id="view-list">
           <div class="page__head" style="margin-bottom: 24px">
