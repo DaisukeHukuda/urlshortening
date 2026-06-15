@@ -599,6 +599,24 @@
 .authcard__toggle { margin-top: 20px; text-align: center; font-size: var(--type-body-sm-size); color: var(--fg-tertiary); }
 .linkbtn { background: none; border: none; padding: 0; font: inherit; color: var(--color-accent); cursor: pointer; }
 .linkbtn:hover { text-decoration: underline; }
-.appbar__user { display: flex; align-items: center; gap: var(--space-3); }
+.appbar__user { display: flex; align-items: center; gap: var(--space-3); flex: none; }
 .appbar__user[hidden] { display: none; }
-.appbar__username { font-size: var(--type-body-sm-size); font-weight: var(--weight-medium); color: var(--fg-secondary); }
+.appbar__username {
+  font-size: var(--type-body-sm-size);
+  font-weight: var(--weight-medium);
+  color: var(--fg-secondary);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 220px;
+}
+
+/* Prevent any horizontal scrolling on small screens */
+html, body { overflow-x: hidden; }
+
+/* Mobile appbar: drop the long service-name text (brandmark keeps the brand),
+   keep username (bounded) + logout so nothing overlaps. */
+@media (max-width: 680px) {
+  .appbar__name { display: none; }
+  .appbar__username { max-width: 150px; }
+}
