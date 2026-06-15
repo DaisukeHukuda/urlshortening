@@ -155,6 +155,15 @@
 .input--error { border-color: var(--color-sale); }
 .input--error:focus { box-shadow: 0 0 0 3px rgba(191,72,0,0.14); }
 
+/* Native date/time inputs (iOS) keep an intrinsic width that overflows the grid;
+   removing the native appearance lets them honor width:100% / min-width:0. */
+input[type="datetime-local"].input,
+input[type="date"].input,
+input[type="time"].input {
+  -webkit-appearance: none;
+  appearance: none;
+}
+
 /* code prefix input (custom code) */
 .input-prefix {
   display: flex;
@@ -562,8 +571,9 @@
 
 /* Inline (compact) create form used by the dense variation */
 .createform--inline { padding: var(--space-5) var(--space-6); }
-.inlineform { display: grid; grid-template-columns: 1.7fr 1fr 1fr 0.95fr auto; gap: var(--space-4); align-items: end; }
-.inlineform .btn { padding: 12px 20px; }
+.inlineform { display: grid; grid-template-columns: 1.7fr 1fr 1fr 0.95fr auto; gap: var(--space-4); align-items: start; }
+.inlineform .btn { padding: 12px 20px; margin-top: 26px; }
+@media (max-width: 680px) { .inlineform .btn { margin-top: 0; } }
 
 /* -------------------------------------------------------------------------
    Mobile layout — driven by .m (framed mock) and a real @media query
