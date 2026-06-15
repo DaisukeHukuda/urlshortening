@@ -19,7 +19,9 @@
     back:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="m15 18-6-6 6-6"/></svg>',
     alert: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><path d="M12 8v4"/><path d="M12 16h.01"/></svg>',
     close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>',
-    link:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>'
+    link:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>',
+    eye:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
+    eyeOff:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.7 5.1A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a13.4 13.4 0 0 1-2.4 3.1"/><path d="M6.6 6.6A13.4 13.4 0 0 0 2 12s3.5 7 10 7a10.8 10.8 0 0 0 4.2-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m2 2 20 20"/></svg>'
   };
 
   /* ---- helpers -------------------------------------------------------- */
@@ -99,6 +101,14 @@
     $("auth-pw-hint").hidden = login;
     $("auth-password").setAttribute("autocomplete", login ? "current-password" : "new-password");
     $("auth-error").hidden = true;
+  }
+
+  function togglePassword(btn) {
+    var input = $("auth-password");
+    var show = input.type === "password";
+    input.type = show ? "text" : "password";
+    btn.setAttribute("aria-label", show ? "パスワードを隠す" : "パスワードを表示");
+    btn.innerHTML = show ? I.eyeOff : I.eye;
   }
 
   /* ---- list rendering ------------------------------------------------- */
@@ -291,6 +301,7 @@
     else if (act === "qr-close") closeQr();
     else if (act === "auth-toggle") { setAuthMode(authMode === "login" ? "register" : "login"); }
     else if (act === "logout") { fetch("/api/logout", { method: "POST" }).then(setLoggedOut); }
+    else if (act === "toggle-password") { togglePassword(el); }
   });
 
   document.addEventListener("keydown", function (e) {
@@ -323,7 +334,7 @@
   var AUTH_ERR = {
     "invalid_credentials": "ユーザーIDまたはパスワードが違います。",
     "username_taken": "そのユーザーIDは既に使われています。",
-    "invalid_username": "ユーザーIDは英数・_.- の3〜32文字で入力してください。",
+    "invalid_username": "ユーザーID（メールアドレス可）の形式が正しくありません。3文字以上で入力してください。",
     "invalid_password": "パスワードは8文字以上で入力してください。"
   };
 

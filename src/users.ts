@@ -23,7 +23,8 @@ export interface UserRow {
   created_at: number;
 }
 
-const USERNAME_RE = /^[A-Za-z0-9_.-]{3,32}$/;
+// Allows plain usernames and email addresses (letters, digits, . _ % + - @).
+const USERNAME_RE = /^[A-Za-z0-9._%+\-@]{3,254}$/;
 
 export function validateUsername(u: string): boolean {
   return typeof u === "string" && USERNAME_RE.test(u);

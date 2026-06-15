@@ -35,6 +35,13 @@ describe("createUser", () => {
     ).rejects.toMatchObject({ reason: "invalid_username" });
   });
 
+  it("accepts an email address as the username", async () => {
+    const result = await createUser(env.DB, "alice@example.com", "password123", NOW);
+    expect(result.username).toBe("alice@example.com");
+    const user = await getUserByUsername(env.DB, "alice@example.com");
+    expect(user?.username).toBe("alice@example.com");
+  });
+
   it("throws UserError(invalid_password) for bad password", async () => {
     await expect(
       createUser(env.DB, "charlie", "short", NOW), // too short (< 8 chars)

@@ -178,6 +178,18 @@
 .input-prefix .input { border: none; border-radius: 0; box-shadow: none; }
 .input-prefix .input:focus { box-shadow: none; }
 
+/* input with a trailing action button (e.g. password show/hide) */
+.input-affix { position: relative; }
+.input-affix .input { padding-right: 42px; }
+.affix-btn {
+  position: absolute; top: 50%; right: 6px; transform: translateY(-50%);
+  width: 32px; height: 32px; display: grid; place-items: center;
+  border: none; background: none; color: var(--fg-tertiary);
+  cursor: pointer; border-radius: var(--radius-sm);
+}
+.affix-btn:hover { color: var(--fg-secondary); background: var(--color-off-white); }
+.affix-btn svg { width: 18px; height: 18px; }
+
 .form-error {
   display: flex;
   align-items: flex-start;
