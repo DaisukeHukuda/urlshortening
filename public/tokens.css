@@ -1,0 +1,261 @@
+/* ============================================================
+   APPLE JP DESIGN SYSTEM — Tokens
+   Inspired by the visual direction of apple.com/jp.
+   ============================================================ */
+
+/* Webfonts ------------------------------------------------- */
+/* Substituting Inter (closest free SF Pro analog) and Noto Sans JP for Apple's proprietary SF Pro JP / SF Pro Display / SF Pro Text. */
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Noto+Sans+JP:wght@400;500;700&family=JetBrains+Mono:wght@400;500&display=swap');
+
+:root {
+  /* ============== COLOR ============== */
+
+  /* Neutrals — the entire system rests on these */
+  --color-white: #ffffff;
+  --color-off-white: #f5f5f7;          /* Section background, sometimes body */
+  --color-near-black: #1d1d1f;         /* Primary text — never pure #000 */
+  --color-pure-black: #000000;         /* Hero / dark sections only */
+
+  /* Grays for hierarchy */
+  --color-gray-90: #1d1d1f;
+  --color-gray-70: #424245;            /* Secondary text */
+  --color-gray-50: #6e6e73;            /* Tertiary / captions */
+  --color-gray-30: #86868b;            /* Disabled, fine print */
+  --color-gray-15: #d2d2d7;            /* Hairlines on light */
+  --color-gray-08: #e8e8ed;            /* Subtle dividers */
+
+  /* Dark-mode body text — never pure white */
+  --color-on-dark: rgba(255, 255, 255, 0.92);
+  --color-on-dark-secondary: rgba(255, 255, 255, 0.72);
+  --color-on-dark-tertiary: rgba(255, 255, 255, 0.56);
+
+  /* Single accent — used for links, primary CTAs */
+  --color-accent: #0071e3;
+  --color-accent-hover: #0077ed;       /* Note: lightens on hover, not darkens */
+  --color-accent-pressed: #006edb;
+
+  /* Semantic — used very rarely */
+  --color-sale: #bf4800;               /* Sale / urgent — almost a brown-red */
+  --color-success: #2c7d2c;            /* Stock available, etc */
+  --color-warn: #b25000;
+
+  /* Surface tokens (semantic) */
+  --bg-canvas: var(--color-white);
+  --bg-section-alt: var(--color-off-white);
+  --bg-hero-dark: var(--color-pure-black);
+  --bg-card: var(--color-white);
+  --bg-card-on-alt: var(--color-white);
+
+  /* Foreground tokens (semantic) */
+  --fg-primary: var(--color-near-black);
+  --fg-secondary: var(--color-gray-70);
+  --fg-tertiary: var(--color-gray-50);
+  --fg-quaternary: var(--color-gray-30);
+  --fg-link: var(--color-accent);
+  --fg-on-dark: var(--color-on-dark);
+  --fg-on-dark-secondary: var(--color-on-dark-secondary);
+
+  /* Hairlines */
+  --hairline-light: 1px solid rgba(0, 0, 0, 0.08);
+  --hairline-dark: 1px solid rgba(255, 255, 255, 0.12);
+  --divider-strong: 1px solid var(--color-gray-15);
+
+  /* Translucent surfaces */
+  --bg-nav-translucent: rgba(251, 251, 253, 0.8);
+  --bg-sheet-scrim: rgba(0, 0, 0, 0.48);
+
+  /* ============== TYPE ============== */
+
+  /* Family stacks */
+  --font-sans: "Inter", "Noto Sans JP", -apple-system, BlinkMacSystemFont,
+               "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3",
+               "Helvetica Neue", Helvetica, Arial, sans-serif;
+  --font-jp:   "Noto Sans JP", "Inter", -apple-system, BlinkMacSystemFont,
+               "Hiragino Kaku Gothic ProN", "ヒラギノ角ゴ ProN W3", sans-serif;
+  --font-mono: "JetBrains Mono", "SF Mono", Menlo, Consolas, monospace;
+
+  /* Weights */
+  --weight-regular: 400;
+  --weight-medium:  500;
+  --weight-semibold: 600;
+  --weight-bold:    700;
+
+  /* Type scale — base sizes (desktop) */
+  --type-display-xl-size: 96px;        --type-display-xl-line: 1.05;   --type-display-xl-tracking: -0.022em;
+  --type-display-1-size:  80px;        --type-display-1-line:  1.0625; --type-display-1-tracking:  -0.015em;
+  --type-display-2-size:  64px;        --type-display-2-line:  1.0834; --type-display-2-tracking:  -0.01em;
+  --type-headline-1-size: 48px;        --type-headline-1-line: 1.08349; --type-headline-1-tracking: -0.003em;
+  --type-headline-2-size: 40px;        --type-headline-2-line: 1.1;     --type-headline-2-tracking: 0em;
+  --type-title-1-size:    32px;        --type-title-1-line:    1.125;   --type-title-1-tracking:    0.004em;
+  --type-title-2-size:    24px;        --type-title-2-line:    1.16667; --type-title-2-tracking:    0.009em;
+  --type-title-3-size:    21px;        --type-title-3-line:    1.19;    --type-title-3-tracking:    0.011em;
+  --type-body-size:       17px;        --type-body-line:       1.47059; --type-body-tracking:       -0.022em;
+  --type-body-sm-size:    15px;        --type-body-sm-line:    1.42857; --type-body-sm-tracking:    -0.014em;
+  --type-caption-size:    12px;        --type-caption-line:    1.33337; --type-caption-tracking:    0em;
+  --type-eyebrow-size:    12px;        --type-eyebrow-line:    1.33;    --type-eyebrow-tracking:    0.08em; /* ALL CAPS */
+
+  /* ============== SPACING (8px base) ============== */
+  --space-1:   4px;
+  --space-2:   8px;
+  --space-3:   12px;
+  --space-4:   16px;
+  --space-5:   20px;
+  --space-6:   24px;
+  --space-8:   32px;
+  --space-10:  40px;
+  --space-12:  48px;
+  --space-16:  64px;
+  --space-20:  80px;
+  --space-24:  96px;
+  --space-32:  128px;
+
+  /* Section vertical rhythm */
+  --space-section-y:        96px;
+  --space-section-y-large:  144px;
+  --space-section-y-hero:   200px;
+
+  /* Layout */
+  --content-max:       980px;
+  --content-max-wide:  1280px;
+  --content-gutter:    22px;
+
+  /* ============== RADIUS ============== */
+  --radius-xs:  4px;
+  --radius-sm:  8px;
+  --radius-md:  12px;
+  --radius-lg:  18px;
+  --radius-xl:  28px;
+  --radius-2xl: 40px;
+  --radius-pill: 980px;
+
+  /* ============== SHADOW (rarely used) ============== */
+  --shadow-none:   none;
+  --shadow-soft:   0 4px 24px rgba(0, 0, 0, 0.04);
+  --shadow-lifted: 0 8px 40px rgba(0, 0, 0, 0.08);
+  --shadow-modal:  0 24px 80px rgba(0, 0, 0, 0.16);
+
+  /* ============== MOTION ============== */
+  --ease-apple: cubic-bezier(0.28, 0.11, 0.32, 1);
+  --duration-fast:    150ms;
+  --duration-base:    300ms;
+  --duration-slow:    500ms;
+
+  /* ============== Z-INDEX ============== */
+  --z-base:      1;
+  --z-elevated:  10;
+  --z-nav:       100;
+  --z-modal:     1000;
+  --z-toast:     2000;
+}
+
+/* ============================================================
+   SEMANTIC ELEMENT DEFAULTS
+   ============================================================ */
+
+html, body {
+  font-family: var(--font-sans);
+  color: var(--fg-primary);
+  background: var(--bg-canvas);
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-line);
+  letter-spacing: var(--type-body-tracking);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1, .h1 {
+  font-size: var(--type-display-1-size);
+  line-height: var(--type-display-1-line);
+  letter-spacing: var(--type-display-1-tracking);
+  font-weight: var(--weight-semibold);
+  color: var(--fg-primary);
+  margin: 0;
+}
+h2, .h2 {
+  font-size: var(--type-headline-1-size);
+  line-height: var(--type-headline-1-line);
+  letter-spacing: var(--type-headline-1-tracking);
+  font-weight: var(--weight-semibold);
+  margin: 0;
+}
+h3, .h3 {
+  font-size: var(--type-title-1-size);
+  line-height: var(--type-title-1-line);
+  letter-spacing: var(--type-title-1-tracking);
+  font-weight: var(--weight-semibold);
+  margin: 0;
+}
+h4, .h4 {
+  font-size: var(--type-title-2-size);
+  line-height: var(--type-title-2-line);
+  letter-spacing: var(--type-title-2-tracking);
+  font-weight: var(--weight-semibold);
+  margin: 0;
+}
+
+p, .body {
+  font-size: var(--type-body-size);
+  line-height: var(--type-body-line);
+  letter-spacing: var(--type-body-tracking);
+  color: var(--fg-secondary);
+  margin: 0;
+}
+
+.body-sm {
+  font-size: var(--type-body-sm-size);
+  line-height: var(--type-body-sm-line);
+  letter-spacing: var(--type-body-sm-tracking);
+}
+
+.caption {
+  font-size: var(--type-caption-size);
+  line-height: var(--type-caption-line);
+  letter-spacing: var(--type-caption-tracking);
+  color: var(--fg-tertiary);
+}
+
+.eyebrow {
+  font-size: var(--type-eyebrow-size);
+  line-height: var(--type-eyebrow-line);
+  letter-spacing: var(--type-eyebrow-tracking);
+  text-transform: uppercase;
+  font-weight: var(--weight-semibold);
+  color: var(--fg-secondary);
+}
+
+.display-xl {
+  font-size: var(--type-display-xl-size);
+  line-height: var(--type-display-xl-line);
+  letter-spacing: var(--type-display-xl-tracking);
+  font-weight: var(--weight-bold);
+}
+.display-1 {
+  font-size: var(--type-display-1-size);
+  line-height: var(--type-display-1-line);
+  letter-spacing: var(--type-display-1-tracking);
+  font-weight: var(--weight-semibold);
+}
+.display-2 {
+  font-size: var(--type-display-2-size);
+  line-height: var(--type-display-2-line);
+  letter-spacing: var(--type-display-2-tracking);
+  font-weight: var(--weight-semibold);
+}
+
+code, .mono {
+  font-family: var(--font-mono);
+  font-size: 0.9em;
+}
+
+a {
+  color: var(--fg-link);
+  text-decoration: none;
+  transition: opacity var(--duration-fast) var(--ease-apple);
+}
+a:hover { text-decoration: underline; }
+
+/* JP context override — slightly looser line height */
+[lang="ja"], .lang-ja {
+  font-family: var(--font-jp);
+  line-height: 1.65;
+}

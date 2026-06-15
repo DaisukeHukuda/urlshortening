@@ -3,87 +3,155 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>URL短縮 管理</title>
+    <title>短縮URL管理 — Yamamotoya URL Shortening Tool</title>
+    <link rel="icon" href="/assets/brandmark.svg" />
+    <link rel="stylesheet" href="/tokens.css" />
     <link rel="stylesheet" href="/styles.css" />
   </head>
   <body>
-    <main>
-      <h1>URL短縮 管理</h1>
+    <div class="app dense">
+      <header class="appbar">
+        <img class="appbar__mark" src="/assets/brandmark.svg" alt="" />
+        <div class="appbar__name">短縮URL管理<span> · Yamamotoya URL Shortening Tool</span></div>
+        <div class="appbar__spacer"></div>
+        <div class="appbar__meta" id="appbar-host"></div>
+      </header>
 
-      <section id="app-view">
-        <form id="create-form">
-          <label>リンク先URL
-            <input type="url" id="target-url" placeholder="https://example.com" required />
-          </label>
-          <label>タイトル（任意）
-            <input type="text" id="title" />
-          </label>
-          <label>カスタムコード（任意）
-            <input type="text" id="custom-code" placeholder="例: sale（英数・-・_、32文字まで）" />
-          </label>
-          <label>有効期限（任意）
-            <input type="datetime-local" id="expires-at" />
-          </label>
-          <button type="submit">短縮URLを作成</button>
-          <p class="error" id="create-error" hidden></p>
-        </form>
+      <main class="page" id="page">
+        <!-- ============ LIST VIEW ============ -->
+        <section id="view-list">
+          <div class="page__head" style="margin-bottom: 24px">
+            <h1 class="page__title">リンク一覧</h1>
+            <p class="page__sub" id="link-count"></p>
+          </div>
 
-        <h2>作成済みリンク</h2>
-        <table id="links-table">
-          <thead>
-            <tr><th>短縮URL</th><th>リンク先</th><th>状態</th><th>クリック</th><th></th></tr>
-          </thead>
-          <tbody id="links-body"></tbody>
-        </table>
+          <div style="display: flex; flex-direction: column; gap: 20px">
+            <form class="card createform createform--inline" id="create-form" novalidate>
+              <div class="inlineform">
+                <div class="field">
+                  <label class="label" for="create-target">リンク先URL<span class="req">必須</span></label>
+                  <input class="input" id="create-target" type="url" placeholder="https://example.com" required />
+                </div>
+                <div class="field">
+                  <label class="label" for="create-title">タイトル<span class="opt">任意</span></label>
+                  <input class="input" id="create-title" placeholder="例: セール" />
+                </div>
+                <div class="field">
+                  <label class="label" for="create-code">カスタムコード<span class="opt">任意</span></label>
+                  <input class="input" id="create-code" placeholder="例: sale" />
+                </div>
+                <div class="field">
+                  <label class="label" for="create-expires">有効期限<span class="opt">任意</span></label>
+                  <input class="input" id="create-expires" type="datetime-local" />
+                </div>
+                <button type="submit" class="btn btn--primary">作成</button>
+              </div>
+              <div class="form-error" id="create-error" hidden>
+                <span data-icon="alert"></span><span class="form-error__msg"></span>
+              </div>
+            </form>
 
-        <section id="edit-view" hidden>
-          <button id="edit-back" type="button">← 一覧に戻る</button>
-          <h2 id="edit-title"></h2>
-          <form id="edit-form">
+            <div class="tablewrap table-only-pc" id="table-wrap">
+              <table class="table">
+                <thead>
+                  <tr>
+                    <th>短縮URL</th>
+                    <th>リンク先URL</th>
+                    <th>状態</th>
+                    <th class="num">クリック</th>
+                    <th class="col-actions">操作</th>
+                  </tr>
+                </thead>
+                <tbody id="links-tbody"></tbody>
+              </table>
+            </div>
+            <div class="cardlist" id="links-cards"></div>
+
+            <div class="empty" id="empty-state" hidden>
+              <div class="empty__icon"><span data-icon="link"></span></div>
+              <div class="empty__title">まだリンクがありません</div>
+              <div class="empty__text">上の「作成」から最初の短縮URLを作成しましょう。</div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ STATS VIEW ============ -->
+        <section id="view-stats" hidden>
+          <button class="backlink" type="button" data-act="back-list"><span data-icon="back"></span>一覧に戻る</button>
+          <div class="page__head" style="margin-bottom: 8px">
+            <div class="eyebrow">Analytics</div>
+            <h1 class="page__title" style="margin-top: 6px">
+              <span class="codemono" id="stats-code"></span> の分析
+            </h1>
+          </div>
+          <div class="stat-hero">
+            <span class="stat-hero__num" id="stats-total">0</span>
+            <span class="stat-hero__label">総クリック数</span>
+          </div>
+          <div class="card card__pad" style="margin-bottom: 32px">
+            <h3 class="section-label">日別クリック</h3>
+            <div class="daychart" id="chart-byday"></div>
+          </div>
+          <div class="breakdowns">
+            <div class="card card__pad"><h3 class="breakdown__title">国</h3><div id="bk-country"></div></div>
+            <div class="card card__pad"><h3 class="breakdown__title">流入元</h3><div id="bk-referer"></div></div>
+            <div class="card card__pad"><h3 class="breakdown__title">デバイス</h3><div id="bk-device"></div></div>
+            <div class="card card__pad"><h3 class="breakdown__title">OS</h3><div id="bk-os"></div></div>
+            <div class="card card__pad" style="grid-column: 1 / -1">
+              <h3 class="breakdown__title">ブラウザ</h3><div id="bk-browser"></div>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============ EDIT VIEW ============ -->
+        <section id="view-edit" hidden>
+          <button class="backlink" type="button" data-act="back-list"><span data-icon="back"></span>一覧に戻る</button>
+          <div class="page__head" style="margin-bottom: 28px">
+            <h1 class="page__title"><span class="codemono" id="edit-code-label"></span> を編集</h1>
+          </div>
+          <form class="card createform" id="edit-form" novalidate>
             <input type="hidden" id="edit-code" />
-            <label>リンク先URL
-              <input type="url" id="edit-target" required />
-            </label>
-            <label>タイトル
-              <input type="text" id="edit-title-input" />
-            </label>
-            <label>有効期限（空で無期限）
-              <input type="datetime-local" id="edit-expires" />
-            </label>
-            <label class="checkbox">
-              <input type="checkbox" id="edit-disabled" /> 無効化する
-            </label>
-            <button type="submit">保存</button>
-            <p class="error" id="edit-error" hidden></p>
+            <div class="formgrid" style="grid-template-columns: 1fr; gap: 24px">
+              <div class="field">
+                <label class="label" for="edit-target">リンク先URL<span class="req">必須</span></label>
+                <input class="input" id="edit-target" type="url" required />
+              </div>
+              <div class="field">
+                <label class="label" for="edit-title-input">タイトル<span class="opt">任意</span></label>
+                <input class="input" id="edit-title-input" />
+              </div>
+              <div class="field">
+                <label class="label" for="edit-expires">有効期限<span class="opt">空で無期限</span></label>
+                <input class="input" id="edit-expires" type="datetime-local" />
+              </div>
+              <label class="field" style="flex-direction: row; align-items: center; gap: 12px; cursor: pointer">
+                <input type="checkbox" id="edit-disabled" style="width: 18px; height: 18px; accent-color: #0071e3" />
+                <span style="font-size: 15px; color: var(--fg-secondary)">このリンクを無効化する</span>
+              </label>
+            </div>
+            <div class="form-error" id="edit-error" hidden>
+              <span data-icon="alert"></span><span class="form-error__msg"></span>
+            </div>
+            <div class="form-actions" style="border-top: var(--hairline-light); margin-top: 28px; padding-top: 24px">
+              <button type="submit" class="btn btn--primary">保存</button>
+              <button type="button" class="btn btn--secondary" data-act="back-list">キャンセル</button>
+            </div>
           </form>
         </section>
+      </main>
+    </div>
 
-        <div id="qr-modal" hidden>
-          <div class="qr-box">
-            <button id="qr-close" type="button">✕</button>
-            <h3 id="qr-title"></h3>
-            <div id="qr-canvas"></div>
-          </div>
-        </div>
+    <!-- ============ QR MODAL ============ -->
+    <div class="modal-overlay" id="qr-modal" hidden>
+      <div class="modal">
+        <button class="modal__close" type="button" data-act="qr-close"><span data-icon="close"></span></button>
+        <div class="modal__label">QR Code</div>
+        <div class="modal__url" id="qr-url"></div>
+        <div class="qrbox" id="qr-box"></div>
+        <div class="modal__hint">スマートフォンのカメラで読み取れます</div>
+      </div>
+    </div>
 
-        <section id="stats-view" hidden>
-          <button id="stats-back" type="button">← 一覧に戻る</button>
-          <h2 id="stats-title"></h2>
-          <p class="stats-total">総クリック数: <strong id="stats-total">0</strong></p>
-
-          <h3>日別クリック</h3>
-          <div id="chart-byday" class="chart"></div>
-
-          <div class="breakdowns">
-            <div><h3>国</h3><div id="bk-country" class="bars"></div></div>
-            <div><h3>流入元</h3><div id="bk-referer" class="bars"></div></div>
-            <div><h3>デバイス</h3><div id="bk-device" class="bars"></div></div>
-            <div><h3>OS</h3><div id="bk-os" class="bars"></div></div>
-            <div><h3>ブラウザ</h3><div id="bk-browser" class="bars"></div></div>
-          </div>
-        </section>
-      </section>
-    </main>
     <script src="/vendor/qrcode.min.js"></script>
     <script src="/app.js"></script>
   </body>
