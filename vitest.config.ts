@@ -17,8 +17,6 @@ export default defineConfig(async () => {
         miniflare: {
           bindings: {
             TEST_MIGRATIONS: migrations,
-            ADMIN_PASSPHRASE: "test-pass",
-            AUTH_SECRET: "test-secret-at-least-32-characters-long",
           },
         },
       }),

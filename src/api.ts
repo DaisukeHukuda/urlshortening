@@ -1,11 +1,4 @@
 import {
-  buildSetCookie,
-  COOKIE_NAME,
-  createToken,
-  readCookie,
-  verifyToken,
-} from "./auth";
-import {
   createLink,
   deleteLink,
   isValidUrl,
@@ -15,8 +8,6 @@ import {
 } from "./links";
 import { getStats } from "./stats";
 import type { Env } from "./types";
-
-const SESSION_TTL_MS = 1000 * 60 * 60 * 24 * 7; // 7 days
 
 function json(
   data: unknown,
@@ -36,25 +27,6 @@ export async function handleApi(
   now: number,
 ): Promise<Response> {
   const path = url.pathname;
-
-  if (path === "/api/login" && req.method === "POST") {
-    const body = (await req.json().catch(() => ({}))) as {
-      passphrase?: string;
-    };
-    if (!body.passphrase || body.passphrase !== env.ADMIN_PASSPHRASE) {
-      return json({ error: "invalid passphrase" }, 401);
-    }
-    const token = await createToken(env.AUTH_SECRET, SESSION_TTL_MS, now);
-    return json({ ok: true }, 200, {
-      "Set-Cookie": buildSetCookie(token, SESSION_TTL_MS / 1000),
-    });
-  }
-
-  // Everything below requires a valid session.
-  const token = readCookie(req, COOKIE_NAME);
-  if (!token || !(await verifyToken(env.AUTH_SECRET, token, now))) {
-    return json({ error: "unauthorized" }, 401);
-  }
 
   if (path === "/api/links" && req.method === "GET") {
     return json({ links: await listLinks(env.DB) });

@@ -1,24 +1,11 @@
-const loginView = document.getElementById("login-view");
 const appView = document.getElementById("app-view");
-const loginForm = document.getElementById("login-form");
-const loginError = document.getElementById("login-error");
 const createForm = document.getElementById("create-form");
 const createError = document.getElementById("create-error");
 const linksBody = document.getElementById("links-body");
 
-function showApp() {
-  loginView.hidden = true;
-  appView.hidden = false;
-  loadLinks();
-}
-
 async function loadLinks() {
   const res = await fetch("/api/links");
-  if (res.status === 401) {
-    appView.hidden = true;
-    loginView.hidden = false;
-    return false;
-  }
+  if (!res.ok) return;
   const { links } = await res.json();
   linksBody.innerHTML = "";
   for (const link of links) {
@@ -40,7 +27,6 @@ async function loadLinks() {
     tr._link = link;
     linksBody.appendChild(tr);
   }
-  return true;
 }
 
 function escapeHtml(s) {
@@ -56,19 +42,6 @@ function linkStatus(link) {
   }
   return { cls: "active", label: "有効" };
 }
-
-loginForm.addEventListener("submit", async (e) => {
-  e.preventDefault();
-  loginError.hidden = true;
-  const passphrase = document.getElementById("passphrase").value;
-  const res = await fetch("/api/login", {
-    method: "POST",
-    headers: { "Content-Type": "application/json" },
-    body: JSON.stringify({ passphrase }),
-  });
-  if (res.ok) showApp();
-  else loginError.hidden = false;
-});
 
 createForm.addEventListener("submit", async (e) => {
   e.preventDefault();
@@ -265,10 +238,5 @@ function showQr(code) {
   qrModal.hidden = false;
 }
 
-// On load: if a valid session cookie already exists, show the app; otherwise stay on login.
-loadLinks().then((ok) => {
-  if (ok) {
-    loginView.hidden = true;
-    appView.hidden = false;
-  }
-});
+// On load: show the app and populate the link table.
+loadLinks();

@@ -10,8 +10,6 @@ declare global {
     interface Env {
       DB: D1Database;
       ASSETS: Fetcher;
-      ADMIN_PASSPHRASE: string;
-      AUTH_SECRET: string;
       TEST_MIGRATIONS: D1Migration[];
     }
   }

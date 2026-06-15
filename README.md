@@ -2,13 +2,13 @@
 
 Cloudflare Workers + D1 で動く自分・社内向けURL短縮サービス（Step 1: MVP）。
 
-短縮リンクは誰でも踏める。作成・管理画面は合言葉1つで保護する。
+短縮リンクは誰でも踏める。作成・管理画面も認証なしで公開（誰でも作成・編集・削除可）。
 
 ## 機能
 
 ### Step 1: MVP
-- 合言葉ログイン（HMAC署名Cookie、DB不要）
 - 短縮URLの作成（ランダム6文字コード）・一覧
+- 管理画面・管理APIは認証なし（公開）
 - `GET /:code` の302リダイレクト
 - 総クリック数カウント（`ctx.waitUntil()` で非同期計測。リダイレクト速度に影響なし）
 
@@ -34,8 +34,6 @@ npm install
 # ローカルD1にマイグレーション適用
 npx wrangler d1 migrations apply url_shortener --local
 
-# .dev.vars に ADMIN_PASSPHRASE と AUTH_SECRET を設定（リポジトリには含めない）
-
 npm run dev        # http://localhost:8787
 npm test           # 全テスト（vitest + miniflare D1）
 npm run typecheck  # tsc --noEmit
@@ -46,8 +44,6 @@ npm run typecheck  # tsc --noEmit
 ```bash
 npx wrangler d1 create url_shortener          # database_id を wrangler.jsonc に記入
 npx wrangler d1 migrations apply url_shortener --remote
-npx wrangler secret put ADMIN_PASSPHRASE
-npx wrangler secret put AUTH_SECRET
 npm run deploy
 ```
 
@@ -56,8 +52,7 @@ npm run deploy
 | パス | 役割 |
 |------|------|
 | `src/index.ts` | fetch エントリ・ルーティング（/api・/:code・静的アセット） |
-| `src/api.ts` | `/api/login`・`/api/links`（CRUD・PATCH・DELETE）・`/api/stats`（要認証） |
-| `src/auth.ts` | HMACトークン生成/検証・Cookie操作 |
+| `src/api.ts` | `/api/links`（CRUD・PATCH・DELETE）・`/api/stats`（認証なし） |
 | `src/links.ts` | links の作成/一覧/取得/更新/削除・URL/コード検証 |
 | `src/redirect.ts` | リダイレクト・無効/期限切れ判定・クリック計測 |
 | `src/stats.ts` | リンク別アクセス集計 |

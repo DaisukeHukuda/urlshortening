@@ -1,8 +1,6 @@
 export interface Env {
   DB: D1Database;
   ASSETS: Fetcher;
-  ADMIN_PASSPHRASE: string;
-  AUTH_SECRET: string;
 }
 
 export interface LinkRow {
