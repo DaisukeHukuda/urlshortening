@@ -592,8 +592,14 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
 /* Inline (compact) create form used by the dense variation */
 .createform--inline { padding: var(--space-5) var(--space-6); }
 .inlineform { display: grid; grid-template-columns: 1.7fr 1fr 1fr 0.95fr auto; gap: var(--space-4); align-items: start; }
-.inlineform .btn { padding: 12px 20px; margin-top: 26px; }
-@media (max-width: 680px) { .inlineform .btn { margin-top: 0; } }
+/* Button sits in a phantom-label field so its top aligns to the input row
+   automatically, and matches the input's line-height so box heights (and thus
+   centers) align exactly. */
+.inlineform .field--btn { align-self: start; }
+.inlineform .btn { padding: 12px 20px; line-height: var(--type-body-sm-line); width: 100%; }
+@media (max-width: 680px) {
+  .inlineform .field--btn .label { display: none; }
+}
 
 /* -------------------------------------------------------------------------
    Mobile layout — driven by .m (framed mock) and a real @media query
