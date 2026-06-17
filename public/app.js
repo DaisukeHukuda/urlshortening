@@ -129,7 +129,9 @@
         '" data-code="' + c + '" title="' + label + '">' + icon +
         '<span class="iconbtn__t">' + label + "</span></button>";
     };
-    return b("stats", "", I.chart, "分析") +
+    return b("copy", "", I.copy, "コピー") +
+      b("open", "", I.ext, "開く") +
+      b("stats", "", I.chart, "分析") +
       b("qr", "", I.qr, "QR") +
       b("edit", "", I.edit, "編集") +
       b("toggle", "", I.power, toggle) +
@@ -137,17 +139,8 @@
   }
   function shortUrlAnchor(l) {
     var c = esc(l.code);
-    return '<span class="shorturl">' +
-      '<button type="button" class="shorturl__btn" data-act="copy" data-code="' + c +
-        '" title="クリックでコピー">' +
-        esc(shortHost()) + '/<span class="shorturl__code">' + c + "</span>" +
-        '<span class="shorturl__copy">' + I.copy + "</span>" +
-      "</button>" +
-      '<a class="shorturl__open" href="' + esc(shortUrl(l.code)) +
-        '" target="_blank" rel="noopener" aria-label="新しいタブで開く" title="開く">' +
-        '<span class="ext">' + I.ext + "</span></a>" +
-      '<span class="shorturl__toast" aria-live="polite"></span>' +
-    "</span>";
+    return '<span class="shorturl">' + esc(shortHost()) +
+      '/<span class="shorturl__code">' + c + "</span></span>";
   }
 
   function renderTable(links, tbody) {
@@ -304,19 +297,15 @@
     return legacyCopy(text);
   }
   function flashCopied(btn, ok) {
-    var wrap = btn.closest(".shorturl");
-    var toast = wrap && wrap.querySelector(".shorturl__toast");
-    var copyIcon = btn.querySelector(".shorturl__copy");
-    if (copyIcon) copyIcon.innerHTML = ok ? I.check : I.copy;
+    var label = ok ? "コピーしました" : "失敗";
+    btn.innerHTML = (ok ? I.check : I.copy) +
+      '<span class="iconbtn__t">' + label + "</span>";
     btn.classList.toggle("is-copied", ok);
-    if (toast) {
-      toast.textContent = ok ? "コピーしました" : "コピーできませんでした";
-      toast.classList.add("show");
-    }
-    setTimeout(function () {
-      if (copyIcon) copyIcon.innerHTML = I.copy;
-      btn.classList.remove("is-copied");
-      if (toast) { toast.classList.remove("show"); toast.textContent = ""; }
+    btn.classList.toggle("iconbtn--danger", !ok);
+    clearTimeout(btn._copyT);
+    btn._copyT = setTimeout(function () {
+      btn.innerHTML = I.copy + '<span class="iconbtn__t">コピー</span>';
+      btn.classList.remove("is-copied", "iconbtn--danger");
     }, 1500);
   }
   function copyShort(btn, code) {
@@ -356,6 +345,7 @@
     var code = el.getAttribute("data-code");
     var link = code ? linksByCode[code] : null;
     if (act === "copy") copyShort(el, code);
+    else if (act === "open") window.open(shortUrl(code), "_blank", "noopener");
     else if (act === "stats") showStats(code);
     else if (act === "qr") showQr(code);
     else if (act === "edit") { if (link) showEdit(link); }
