@@ -167,11 +167,15 @@
 .input--error { border-color: var(--color-sale); }
 .input--error:focus { box-shadow: 0 0 0 3px rgba(191,72,0,0.14); }
 
-/* Native date/time inputs (iOS) keep an intrinsic width that overflows the grid.
+/* date inputs: keep the native control so the built-in calendar icon stays
+   clickable and opens the picker. Ensure it fits the grid and aligns nicely. */
+input[type="date"].input { min-height: 44px; cursor: pointer; }
+input[type="date"].input::-webkit-calendar-picker-indicator { cursor: pointer; }
+
+/* datetime-local/time (iOS) keep an intrinsic width that overflows the grid.
    Removing the native appearance lets them honor width:100% / min-width:0, but it
    also strips the calendar icon — so we re-add one and keep the value text visible. */
 input[type="datetime-local"].input,
-input[type="date"].input,
 input[type="time"].input {
   -webkit-appearance: none;
   appearance: none;
@@ -381,13 +385,40 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
   gap: 7px;
   font-family: var(--font-mono);
   font-size: 14px;
-  color: var(--color-accent);
-  text-decoration: none;
   white-space: nowrap;
 }
-.shorturl:hover { text-decoration: underline; }
-.shorturl .ext { width: 13px; height: 13px; opacity: 0.55; }
+.shorturl__btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font: inherit;
+  color: var(--color-accent);
+  background: none;
+  border: none;
+  padding: 0;
+  margin: 0;
+  cursor: pointer;
+}
+.shorturl__btn:hover { text-decoration: underline; }
+.shorturl__btn:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 2px; border-radius: 4px; }
 .shorturl__code { color: var(--fg-primary); }
+.shorturl__copy { display: inline-flex; width: 13px; height: 13px; opacity: 0.5; margin-left: 1px; }
+.shorturl__copy svg { width: 13px; height: 13px; }
+.shorturl__btn:hover .shorturl__copy { opacity: 0.8; }
+.shorturl__btn.is-copied { color: var(--color-success); text-decoration: none; }
+.shorturl__btn.is-copied .shorturl__copy { opacity: 1; color: var(--color-success); }
+.shorturl__open { display: inline-flex; color: var(--color-accent); }
+.shorturl__open .ext { width: 13px; height: 13px; opacity: 0.55; }
+.shorturl__open:hover .ext { opacity: 0.85; }
+.shorturl__toast {
+  font-family: var(--font-jp);
+  font-size: 12px;
+  font-weight: var(--weight-medium);
+  color: var(--color-success);
+  opacity: 0;
+  transition: opacity var(--duration-fast) var(--ease-apple);
+}
+.shorturl__toast.show { opacity: 1; }
 .row-title { font-size: 13px; color: var(--fg-tertiary); margin-top: 3px; }
 
 /* target url cell */
@@ -424,7 +455,8 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
 .linkcard__top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
 .linkcard__top .linkcard__row { min-width: 0; }
 .linkcard__top .badge { flex: none; }
-.linkcard .shorturl { white-space: normal; word-break: break-all; }
+.linkcard .shorturl { white-space: normal; flex-wrap: wrap; }
+.linkcard .shorturl__btn { white-space: normal; word-break: break-all; text-align: left; }
 .linkcard__row { display: flex; flex-direction: column; gap: 3px; }
 .linkcard__lbl { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg-quaternary); }
 .linkcard__val { font-size: var(--type-body-sm-size); color: var(--fg-secondary); word-break: break-all; }

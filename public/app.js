@@ -21,7 +21,9 @@
     close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M18 6 6 18"/><path d="M6 6l12 12"/></svg>',
     link:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round"><path d="M10 13a5 5 0 0 0 7 0l3-3a5 5 0 0 0-7-7l-1.5 1.5"/><path d="M14 11a5 5 0 0 0-7 0l-3 3a5 5 0 0 0 7 7l1.5-1.5"/></svg>',
     eye:   '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M2 12s3.5-7 10-7 10 7 10 7-3.5 7-10 7-10-7-10-7Z"/><circle cx="12" cy="12" r="3"/></svg>',
-    eyeOff:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.7 5.1A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a13.4 13.4 0 0 1-2.4 3.1"/><path d="M6.6 6.6A13.4 13.4 0 0 0 2 12s3.5 7 10 7a10.8 10.8 0 0 0 4.2-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m2 2 20 20"/></svg>'
+    eyeOff:'<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><path d="M10.7 5.1A10.8 10.8 0 0 1 12 5c6.5 0 10 7 10 7a13.4 13.4 0 0 1-2.4 3.1"/><path d="M6.6 6.6A13.4 13.4 0 0 0 2 12s3.5 7 10 7a10.8 10.8 0 0 0 4.2-.8"/><path d="M9.9 9.9a3 3 0 0 0 4.2 4.2"/><path d="m2 2 20 20"/></svg>',
+    copy:  '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.7" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15H4a2 2 0 0 1-2-2V4a2 2 0 0 1 2-2h9a2 2 0 0 1 2 2v1"/></svg>',
+    check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6 9 17l-5-5"/></svg>'
   };
 
   /* ---- helpers -------------------------------------------------------- */
@@ -45,16 +47,21 @@
   function shortHost() { return location.host; }
   function shortUrl(code) { return location.origin + "/" + code; }
 
-  function msToLocalInput(ms) {
+  // Expiry is a calendar date (no time). Store/restore as YYYY-MM-DD and treat
+  // the chosen day's *end* (23:59:59.999 local) as the moment it expires, so a
+  // link stays valid through the whole selected day.
+  function msToDateInput(ms) {
     if (ms == null) return "";
     var d = new Date(ms);
     var p = function (n) { return String(n).padStart(2, "0"); };
-    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate()) +
-      "T" + p(d.getHours()) + ":" + p(d.getMinutes());
+    return d.getFullYear() + "-" + p(d.getMonth() + 1) + "-" + p(d.getDate());
   }
-  function localInputToMs(v) {
+  function dateInputToMs(v) {
     if (!v) return null;
-    var ms = new Date(v).getTime();
+    var parts = v.split("-");
+    if (parts.length !== 3) return null;
+    var d = new Date(+parts[0], +parts[1] - 1, +parts[2], 23, 59, 59, 999);
+    var ms = d.getTime();
     return isNaN(ms) ? null : ms;
   }
 
@@ -130,9 +137,17 @@
   }
   function shortUrlAnchor(l) {
     var c = esc(l.code);
-    return '<a class="shorturl" href="' + esc(shortUrl(l.code)) + '" target="_blank" rel="noopener">' +
-      esc(shortHost()) + '/<span class="shorturl__code">' + c + "</span>" +
-      '<span class="ext">' + I.ext + "</span></a>";
+    return '<span class="shorturl">' +
+      '<button type="button" class="shorturl__btn" data-act="copy" data-code="' + c +
+        '" title="クリックでコピー">' +
+        esc(shortHost()) + '/<span class="shorturl__code">' + c + "</span>" +
+        '<span class="shorturl__copy">' + I.copy + "</span>" +
+      "</button>" +
+      '<a class="shorturl__open" href="' + esc(shortUrl(l.code)) +
+        '" target="_blank" rel="noopener" aria-label="新しいタブで開く" title="開く">' +
+        '<span class="ext">' + I.ext + "</span></a>" +
+      '<span class="shorturl__toast" aria-live="polite"></span>' +
+    "</span>";
   }
 
   function renderTable(links, tbody) {
@@ -240,7 +255,7 @@
     $("edit-code-label").textContent = "/" + link.code;
     $("edit-target").value = link.target_url;
     $("edit-title-input").value = link.title || "";
-    $("edit-expires").value = msToLocalInput(link.expires_at);
+    $("edit-expires").value = msToDateInput(link.expires_at);
     $("edit-disabled").checked = !!link.disabled;
     clearFormError($("edit-error"));
     showView("edit");
@@ -262,6 +277,54 @@
     qrModal.hidden = false;
   }
   function closeQr() { qrModal.hidden = true; }
+
+  /* ---- copy short URL ------------------------------------------------- */
+  function legacyCopy(text) {
+    return new Promise(function (resolve, reject) {
+      try {
+        var ta = document.createElement("textarea");
+        ta.value = text;
+        ta.style.position = "fixed";
+        ta.style.left = "-9999px";
+        document.body.appendChild(ta);
+        ta.select();
+        var ok = document.execCommand("copy");
+        document.body.removeChild(ta);
+        ok ? resolve() : reject(new Error("execCommand failed"));
+      } catch (e) { reject(e); }
+    });
+  }
+  function copyText(text) {
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+      // Fall back to execCommand if the async clipboard API is blocked.
+      return navigator.clipboard.writeText(text).catch(function () {
+        return legacyCopy(text);
+      });
+    }
+    return legacyCopy(text);
+  }
+  function flashCopied(btn, ok) {
+    var wrap = btn.closest(".shorturl");
+    var toast = wrap && wrap.querySelector(".shorturl__toast");
+    var copyIcon = btn.querySelector(".shorturl__copy");
+    if (copyIcon) copyIcon.innerHTML = ok ? I.check : I.copy;
+    btn.classList.toggle("is-copied", ok);
+    if (toast) {
+      toast.textContent = ok ? "コピーしました" : "コピーできませんでした";
+      toast.classList.add("show");
+    }
+    setTimeout(function () {
+      if (copyIcon) copyIcon.innerHTML = I.copy;
+      btn.classList.remove("is-copied");
+      if (toast) { toast.classList.remove("show"); toast.textContent = ""; }
+    }, 1500);
+  }
+  function copyShort(btn, code) {
+    copyText(shortUrl(code)).then(
+      function () { flashCopied(btn, true); },
+      function () { flashCopied(btn, false); }
+    );
+  }
 
   /* ---- actions -------------------------------------------------------- */
   function toggleDisabled(link) {
@@ -292,7 +355,8 @@
     var act = el.getAttribute("data-act");
     var code = el.getAttribute("data-code");
     var link = code ? linksByCode[code] : null;
-    if (act === "stats") showStats(code);
+    if (act === "copy") copyShort(el, code);
+    else if (act === "stats") showStats(code);
     else if (act === "qr") showQr(code);
     else if (act === "edit") { if (link) showEdit(link); }
     else if (act === "toggle") { if (link) toggleDisabled(link); }
@@ -315,7 +379,7 @@
     var target_url = $("create-target").value.trim();
     var title = $("create-title").value.trim();
     var code = $("create-code").value.trim();
-    var expires_at = localInputToMs($("create-expires").value);
+    var expires_at = dateInputToMs($("create-expires").value);
     fetch("/api/links", {
       method: "POST",
       headers: { "Content-Type": "application/json" },
@@ -370,7 +434,7 @@
     var payload = {
       target_url: $("edit-target").value.trim(),
       title: $("edit-title-input").value.trim(),
-      expires_at: localInputToMs($("edit-expires").value),
+      expires_at: dateInputToMs($("edit-expires").value),
       disabled: $("edit-disabled").checked
     };
     fetch("/api/links/" + encodeURIComponent(code), {
