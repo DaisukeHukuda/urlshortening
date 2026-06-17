@@ -52,11 +52,6 @@
 
         <!-- ============ LIST VIEW ============ -->
         <section id="view-list">
-          <div class="page__head" style="margin-bottom: 24px">
-            <h1 class="page__title">リンク一覧</h1>
-            <p class="page__sub" id="link-count"></p>
-          </div>
-
           <div style="display: flex; flex-direction: column; gap: 20px">
             <form class="card createform createform--inline" id="create-form" novalidate>
               <div class="inlineform">
@@ -87,6 +82,11 @@
                 <span data-icon="alert"></span><span class="form-error__msg"></span>
               </div>
             </form>
+
+            <div class="page__head" style="margin-top: 12px">
+              <h1 class="page__title">リンク一覧</h1>
+              <p class="page__sub" id="link-count"></p>
+            </div>
 
             <div class="tablewrap table-only-pc" id="table-wrap">
               <table class="table">
