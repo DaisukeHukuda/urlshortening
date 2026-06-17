@@ -29,6 +29,18 @@
   -webkit-backdrop-filter: saturate(180%) blur(20px);
   border-bottom: var(--hairline-light);
 }
+.appbar__brand {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  min-width: 0;
+  text-decoration: none;
+  color: inherit;
+  border-radius: var(--radius-md);
+  transition: opacity var(--duration-fast) var(--ease-apple);
+}
+.appbar__brand:hover { opacity: 0.65; }
+.appbar__brand:focus-visible { outline: 2px solid var(--color-accent); outline-offset: 3px; }
 .appbar__mark { width: 24px; height: 24px; display: block; flex: none; }
 .appbar__name {
   font-size: var(--type-body-sm-size);
