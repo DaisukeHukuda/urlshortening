@@ -172,7 +172,9 @@
     container.innerHTML = links.map(function (l) {
       return '<div class="linkcard">' +
         '<div class="linkcard__top">' +
-          '<div class="linkcard__row">' + shortUrlAnchor(l) +
+          '<div class="linkcard__row">' +
+            '<div class="cellurl">' + shortUrlAnchor(l) +
+              copyBtn("copy", l.code, "短縮URLをコピー") + "</div>" +
             (l.title ? '<div class="row-title">' + esc(l.title) + "</div>" : "") +
           "</div>" + badge(l) +
         "</div>" +
@@ -185,7 +187,7 @@
         '<div class="linkcard__grid">' +
           '<div class="linkcard__row"><span class="linkcard__lbl">クリック数</span><span class="clicks">' + nf(l.click_count) + "</span></div>" +
         "</div>" +
-        '<div class="linkcard__actions">' + rowActions(l) + "</div>" +
+        '<div class="linkcard__actions">' + rowActions(l, true) + "</div>" +
       "</div>";
     }).join("");
   }

@@ -502,6 +502,8 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
 .linkcard__top .linkcard__row { min-width: 0; }
 .linkcard__top .badge { flex: none; }
 .linkcard .shorturl { white-space: normal; }
+/* card: copy button sits beside the short URL's first line */
+.linkcard__top .cellurl { align-items: flex-start; }
 .linkcard__row { display: flex; flex-direction: column; gap: 3px; }
 .linkcard__lbl { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg-quaternary); }
 .linkcard__val { font-size: var(--type-body-sm-size); color: var(--fg-secondary); word-break: break-all; }
