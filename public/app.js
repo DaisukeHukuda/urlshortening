@@ -126,7 +126,7 @@
     var toggle = l.disabled ? "有効化" : "無効化";
     var b = function (act, cls, icon, label) {
       return '<button class="iconbtn' + (cls ? " " + cls : "") + '" data-act="' + act +
-        '" data-code="' + c + '" title="' + label + '">' + icon +
+        '" data-code="' + c + '" aria-label="' + label + '">' + icon +
         '<span class="iconbtn__t">' + label + "</span></button>";
     };
     return b("copy", "", I.copy, "コピー") +
@@ -361,6 +361,48 @@
   document.addEventListener("keydown", function (e) {
     if (e.key === "Escape" && !qrModal.hidden) closeQr();
   });
+
+  /* ---- hover/focus tooltips for icon-only buttons (desktop table) ----- */
+  var tipEl = null;
+  function tooltipTarget(node) {
+    return node && node.closest ? node.closest(".table .row-actions .iconbtn") : null;
+  }
+  function showTip(btn) {
+    var label = btn.getAttribute("aria-label");
+    if (!label) return;
+    if (!tipEl) {
+      tipEl = document.createElement("div");
+      tipEl.className = "tooltip";
+      tipEl.setAttribute("role", "tooltip");
+      document.body.appendChild(tipEl);
+    }
+    tipEl.textContent = label;
+    tipEl.classList.add("show");
+    var r = btn.getBoundingClientRect();
+    var tr = tipEl.getBoundingClientRect();
+    var top = r.top - tr.height - 8;
+    var below = top < 4;
+    if (below) top = r.bottom + 8;
+    var left = r.left + r.width / 2 - tr.width / 2;
+    left = Math.max(6, Math.min(left, window.innerWidth - tr.width - 6));
+    tipEl.classList.toggle("tooltip--below", below);
+    tipEl.style.top = (top + window.scrollY) + "px";
+    tipEl.style.left = (left + window.scrollX) + "px";
+  }
+  function hideTip() { if (tipEl) tipEl.classList.remove("show"); }
+  document.addEventListener("mouseover", function (e) {
+    var btn = tooltipTarget(e.target);
+    if (btn) showTip(btn);
+  });
+  document.addEventListener("mouseout", function (e) {
+    if (tooltipTarget(e.target)) hideTip();
+  });
+  document.addEventListener("focusin", function (e) {
+    var btn = tooltipTarget(e.target);
+    if (btn) showTip(btn);
+  });
+  document.addEventListener("focusout", hideTip);
+  window.addEventListener("scroll", hideTip, true);
 
   $("create-form").addEventListener("submit", function (e) {
     e.preventDefault();
