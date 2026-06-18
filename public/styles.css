@@ -445,17 +445,18 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
 .copybtn:active { transform: scale(0.95); }
 .copybtn.is-copied { color: var(--color-success); border-color: rgba(44,125,44,0.4); background: rgba(44,125,44,0.08); }
 
-/* short url cell — show the full short link (incl. custom code), wrapping
-   at the slash when it doesn't fit, on both PC and mobile */
+/* short url cell — host/ on line 1, the custom code always on line 2 (so it's
+   fully visible and left-aligned with the title below). PC + mobile. */
 .shorturl {
+  display: block;
   font-family: var(--font-mono);
   font-size: 14px;
   color: var(--color-accent);
-  white-space: normal;
   overflow-wrap: anywhere;
-  line-height: 1.35;
+  line-height: 1.4;
 }
-.shorturl__code { color: var(--fg-primary); }
+.shorturl__host { display: block; }
+.shorturl__code { display: block; color: var(--fg-primary); }
 /* copy-confirmation state on the action button */
 .iconbtn.is-copied {
   color: var(--color-success);
@@ -673,6 +674,9 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
 .dense .table thead th { padding: 10px var(--space-5); }
 .dense .table tbody td { padding: var(--space-3) var(--space-5); }
 .dense .row-title { display: inline; margin: 0 0 0 8px; }
+/* in the table / cards the title sits on its own line, left-aligned with the
+   short URL's custom code (not inline) */
+.dense .table .row-title, .dense .linkcard .row-title { display: block; margin: 4px 0 0; }
 .dense .shorturl { font-size: 13px; }
 .dense .iconbtn { padding: 5px 9px; font-size: 12px; }
 .dense .target { font-size: 13px; max-width: 260px; }

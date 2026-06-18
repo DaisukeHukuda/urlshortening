@@ -139,8 +139,9 @@
   }
   function shortUrlAnchor(l) {
     var c = esc(l.code);
-    return '<span class="shorturl">' + esc(shortHost()) +
-      "/<wbr><span class=\"shorturl__code\">" + c + "</span></span>";
+    return '<span class="shorturl">' +
+      '<span class="shorturl__host">' + esc(shortHost()) + "/</span>" +
+      '<span class="shorturl__code">' + c + "</span></span>";
   }
   // small inline copy button used inside the table URL cells
   function copyBtn(act, code, label) {
