@@ -176,7 +176,12 @@
             (l.title ? '<div class="row-title">' + esc(l.title) + "</div>" : "") +
           "</div>" + badge(l) +
         "</div>" +
-        '<div class="linkcard__row"><span class="linkcard__lbl">リンク先</span><span class="linkcard__val">' + esc(l.target_url) + "</span></div>" +
+        '<div class="linkcard__row"><span class="linkcard__lbl">リンク先</span>' +
+          '<div class="cellurl">' +
+            '<span class="target" title="' + esc(l.target_url) + '">' + esc(l.target_url) + "</span>" +
+            copyBtn("copy-target", l.code, "リンク先URLをコピー") +
+          "</div>" +
+        "</div>" +
         '<div class="linkcard__grid">' +
           '<div class="linkcard__row"><span class="linkcard__lbl">クリック数</span><span class="clicks">' + nf(l.click_count) + "</span></div>" +
         "</div>" +
