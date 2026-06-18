@@ -121,7 +121,7 @@
   /* ---- list rendering ------------------------------------------------- */
   var linksByCode = {};
 
-  function rowActions(l) {
+  function rowActions(l, skipCopy) {
     var c = esc(l.code);
     var toggle = l.disabled ? "有効化" : "無効化";
     var b = function (act, cls, icon, label) {
@@ -129,7 +129,7 @@
         '" data-code="' + c + '" aria-label="' + label + '">' + icon +
         '<span class="iconbtn__t">' + label + "</span></button>";
     };
-    return b("copy", "", I.copy, "コピー") +
+    return (skipCopy ? "" : b("copy", "", I.copy, "コピー")) +
       b("open", "", I.ext, "開く") +
       b("stats", "", I.chart, "分析") +
       b("qr", "", I.qr, "QR") +
@@ -142,17 +142,27 @@
     return '<span class="shorturl">' + esc(shortHost()) +
       '/<span class="shorturl__code">' + c + "</span></span>";
   }
+  // small inline copy button used inside the table URL cells
+  function copyBtn(act, code, label) {
+    return '<button type="button" class="copybtn" data-act="' + act +
+      '" data-code="' + esc(code) + '" aria-label="' + label + '">' + I.copy + "</button>";
+  }
 
   function renderTable(links, tbody) {
     tbody.innerHTML = links.map(function (l) {
       return "<tr>" +
-        "<td>" + shortUrlAnchor(l) +
+        "<td>" +
+          '<div class="cellurl">' + shortUrlAnchor(l) +
+            copyBtn("copy", l.code, "短縮URLをコピー") + "</div>" +
           (l.title ? '<div class="row-title">' + esc(l.title) + "</div>" : "") +
         "</td>" +
-        '<td><span class="target" title="' + esc(l.target_url) + '">' + esc(l.target_url) + "</span></td>" +
+        '<td><div class="cellurl">' +
+          '<span class="target" title="' + esc(l.target_url) + '">' + esc(l.target_url) + "</span>" +
+          copyBtn("copy-target", l.code, "リンク先URLをコピー") +
+        "</div></td>" +
         "<td>" + badge(l) + "</td>" +
         '<td class="num"><span class="clicks">' + nf(l.click_count) + "</span></td>" +
-        '<td class="col-actions"><div class="row-actions">' + rowActions(l) + "</div></td>" +
+        '<td class="col-actions"><div class="row-actions">' + rowActions(l, true) + "</div></td>" +
       "</tr>";
     }).join("");
   }
@@ -297,19 +307,29 @@
     return legacyCopy(text);
   }
   function flashCopied(btn, ok) {
-    var label = ok ? "コピーしました" : "失敗";
-    btn.innerHTML = (ok ? I.check : I.copy) +
-      '<span class="iconbtn__t">' + label + "</span>";
+    if (btn._copyT) clearTimeout(btn._copyT);
+    if (btn._orig == null) btn._orig = btn.innerHTML;
+    var hasLabel = /iconbtn__t/.test(btn._orig);
+    btn.innerHTML = hasLabel
+      ? (ok ? I.check : I.copy) + '<span class="iconbtn__t">' + (ok ? "コピーしました" : "失敗") + "</span>"
+      : (ok ? I.check : I.copy);
     btn.classList.toggle("is-copied", ok);
-    btn.classList.toggle("iconbtn--danger", !ok);
-    clearTimeout(btn._copyT);
     btn._copyT = setTimeout(function () {
-      btn.innerHTML = I.copy + '<span class="iconbtn__t">コピー</span>';
-      btn.classList.remove("is-copied", "iconbtn--danger");
+      if (btn._orig != null) btn.innerHTML = btn._orig;
+      btn._orig = null;
+      btn.classList.remove("is-copied");
     }, 1500);
   }
   function copyShort(btn, code) {
     copyText(shortUrl(code)).then(
+      function () { flashCopied(btn, true); },
+      function () { flashCopied(btn, false); }
+    );
+  }
+  function copyTarget(btn, code) {
+    var l = linksByCode[code];
+    if (!l) return;
+    copyText(l.target_url).then(
       function () { flashCopied(btn, true); },
       function () { flashCopied(btn, false); }
     );
@@ -345,6 +365,7 @@
     var code = el.getAttribute("data-code");
     var link = code ? linksByCode[code] : null;
     if (act === "copy") copyShort(el, code);
+    else if (act === "copy-target") copyTarget(el, code);
     else if (act === "open") window.open(shortUrl(code), "_blank", "noopener");
     else if (act === "stats") showStats(code);
     else if (act === "qr") showQr(code);
@@ -365,7 +386,9 @@
   /* ---- hover/focus tooltips for icon-only buttons (desktop table) ----- */
   var tipEl = null;
   function tooltipTarget(node) {
-    return node && node.closest ? node.closest(".table .row-actions .iconbtn") : null;
+    return node && node.closest
+      ? node.closest(".table .row-actions .iconbtn, .table .copybtn")
+      : null;
   }
   function showTip(btn) {
     var label = btn.getAttribute("aria-label");

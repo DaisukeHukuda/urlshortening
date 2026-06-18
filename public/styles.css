@@ -392,7 +392,13 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
   box-shadow: var(--shadow-soft);
   overflow: hidden;
 }
-.table { width: 100%; border-collapse: collapse; }
+.table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+/* fixed column widths so the actions column can never be pushed out / clipped */
+.table th:nth-child(1), .table td:nth-child(1) { width: 26%; }
+.table th:nth-child(3), .table td:nth-child(3) { width: 104px; }
+.table th:nth-child(4), .table td:nth-child(4) { width: 80px; }
+.table th:nth-child(5), .table td:nth-child(5) { width: 232px; }
+/* column 2 (リンク先URL) takes the remaining space and truncates */
 .table thead th {
   text-align: left;
   font-size: 11px;
@@ -416,6 +422,32 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
 .table .num { text-align: right; font-variant-numeric: tabular-nums; }
 .col-actions { text-align: right; }
 
+/* url cell: url text (truncating) + inline copy button */
+.cellurl { display: flex; align-items: center; gap: 8px; min-width: 0; }
+.cellurl > .shorturl, .cellurl > .target {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.copybtn {
+  flex: none;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  border: 1px solid var(--color-gray-15);
+  border-radius: 8px;
+  background: var(--color-white);
+  color: var(--fg-tertiary);
+  cursor: pointer;
+  transition: all var(--duration-fast) var(--ease-apple);
+}
+.copybtn svg { width: 14px; height: 14px; }
+.copybtn:hover { color: var(--fg-primary); border-color: var(--color-gray-30); background: var(--color-off-white); }
+.copybtn:active { transform: scale(0.95); }
+.copybtn.is-copied { color: var(--color-success); border-color: rgba(44,125,44,0.4); background: rgba(44,125,44,0.08); }
+
 /* short url cell */
 .shorturl {
   font-family: var(--font-mono);
@@ -435,7 +467,7 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
 /* target url cell */
 .target {
   display: block;
-  max-width: 320px;
+  max-width: 100%;
   font-size: var(--type-body-sm-size);
   color: var(--fg-secondary);
   white-space: nowrap;
@@ -445,9 +477,11 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
 .clicks { font-variant-numeric: tabular-nums; font-weight: var(--weight-medium); color: var(--fg-primary); font-size: 15px; }
 
 .row-actions { display: inline-flex; gap: 6px; justify-content: flex-end; flex-wrap: nowrap; }
-/* Desktop table: icon-only actions (labels via title tooltip) to keep the row compact */
-.table .row-actions .iconbtn { padding: 7px; }
+/* Desktop table: icon-only actions (labels via hover tooltip) to keep the row compact */
+.table .row-actions { gap: 5px; }
+.table .row-actions .iconbtn { padding: 6px; }
 .table .row-actions .iconbtn__t { display: none; }
+.table td.col-actions { padding-left: var(--space-3); }
 
 /* -------------------------------------------------------------------------
    Link cards (mobile transform)
