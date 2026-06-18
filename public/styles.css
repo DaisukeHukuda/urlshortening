@@ -422,13 +422,10 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
 .table .num { text-align: right; font-variant-numeric: tabular-nums; }
 .col-actions { text-align: right; }
 
-/* url cell: url text (truncating) + inline copy button */
+/* url cell: url text + inline copy button */
 .cellurl { display: flex; align-items: center; gap: 8px; min-width: 0; }
-.cellurl > .shorturl, .cellurl > .target {
-  min-width: 0;
-  overflow: hidden;
-  text-overflow: ellipsis;
-}
+.cellurl > .shorturl { min-width: 0; }            /* short url: full text, wraps */
+.cellurl > .target { min-width: 0; overflow: hidden; text-overflow: ellipsis; }
 .copybtn {
   flex: none;
   display: inline-flex;
@@ -448,12 +445,15 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
 .copybtn:active { transform: scale(0.95); }
 .copybtn.is-copied { color: var(--color-success); border-color: rgba(44,125,44,0.4); background: rgba(44,125,44,0.08); }
 
-/* short url cell */
+/* short url cell — show the full short link (incl. custom code), wrapping
+   at the slash when it doesn't fit, on both PC and mobile */
 .shorturl {
   font-family: var(--font-mono);
   font-size: 14px;
   color: var(--color-accent);
-  white-space: nowrap;
+  white-space: normal;
+  overflow-wrap: anywhere;
+  line-height: 1.35;
 }
 .shorturl__code { color: var(--fg-primary); }
 /* copy-confirmation state on the action button */
@@ -500,7 +500,7 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
 .linkcard__top { display: flex; align-items: flex-start; justify-content: space-between; gap: var(--space-3); }
 .linkcard__top .linkcard__row { min-width: 0; }
 .linkcard__top .badge { flex: none; }
-.linkcard .shorturl { white-space: normal; word-break: break-all; }
+.linkcard .shorturl { white-space: normal; }
 .linkcard__row { display: flex; flex-direction: column; gap: 3px; }
 .linkcard__lbl { font-size: 11px; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg-quaternary); }
 .linkcard__val { font-size: var(--type-body-sm-size); color: var(--fg-secondary); word-break: break-all; }
