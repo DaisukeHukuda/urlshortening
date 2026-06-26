@@ -6,6 +6,7 @@ import {
   readCookie,
   verifyPassword,
   verifySession,
+  type Session,
 } from "./auth";
 import {
   createLink,
@@ -33,6 +34,14 @@ function json(
   });
 }
 
+function isAdmin(session: Session, env: Env): boolean {
+  return (env.ADMIN_USERNAMES ?? "")
+    .split(",")
+    .map((s) => s.trim())
+    .filter(Boolean)
+    .includes(session.username);
+}
+
 export async function handleApi(
   req: Request,
   env: Env,
@@ -52,7 +61,11 @@ export async function handleApi(
       const user = await createUser(env.DB, body.username ?? "", body.password ?? "", now);
       const token = await createSession(env.AUTH_SECRET, { userId: user.id, username: user.username }, SESSION_TTL, now);
       const ttlSec = SESSION_TTL / 1000;
-      return json({ user }, 201, { "Set-Cookie": buildSetCookie(token, ttlSec) });
+      return json(
+        { user, isAdmin: isAdmin({ userId: user.id, username: user.username }, env) },
+        201,
+        { "Set-Cookie": buildSetCookie(token, ttlSec) },
+      );
     } catch (e) {
       if (e instanceof UserError) {
         const status = e.reason === "username_taken" ? 409 : 400;
@@ -77,9 +90,14 @@ export async function handleApi(
     }
     const token = await createSession(env.AUTH_SECRET, { userId: user.id, username: user.username }, SESSION_TTL, now);
     const ttlSec = SESSION_TTL / 1000;
-    return json({ user: { id: user.id, username: user.username } }, 200, {
-      "Set-Cookie": buildSetCookie(token, ttlSec),
-    });
+    return json(
+      {
+        user: { id: user.id, username: user.username },
+        isAdmin: isAdmin({ userId: user.id, username: user.username }, env),
+      },
+      200,
+      { "Set-Cookie": buildSetCookie(token, ttlSec) },
+    );
   }
 
   if (path === "/api/logout" && req.method === "POST") {
@@ -95,7 +113,10 @@ export async function handleApi(
   // --- Authed routes ---
 
   if (path === "/api/me" && req.method === "GET") {
-    return json({ user: { id: session.userId, username: session.username } });
+    return json({
+      user: { id: session.userId, username: session.username },
+      isAdmin: isAdmin(session, env),
+    });
   }
 
   if (path === "/api/links" && req.method === "GET") {

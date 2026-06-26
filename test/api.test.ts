@@ -350,3 +350,25 @@ describe("getLink assertion helper", () => {
     expect(link?.user_id).toBeTypeOf("number");
   });
 });
+
+describe("isAdmin flag", () => {
+  it("/api/me returns isAdmin true for the admin user, false otherwise", async () => {
+    const adminCookie = await register("admin", "password123");
+    const userCookie = await register("alice", "password123");
+
+    const adminMe = await handleApi(get("/api/me", adminCookie), env, new URL("http://x/api/me"), NOW);
+    expect((await adminMe.json() as { isAdmin: boolean }).isAdmin).toBe(true);
+
+    const userMe = await handleApi(get("/api/me", userCookie), env, new URL("http://x/api/me"), NOW);
+    expect((await userMe.json() as { isAdmin: boolean }).isAdmin).toBe(false);
+  });
+
+  it("login response includes isAdmin", async () => {
+    await register("admin", "password123");
+    const res = await handleApi(
+      post("/api/login", { username: "admin", password: "password123" }),
+      env, new URL("http://x/api/login"), NOW,
+    );
+    expect((await res.json() as { isAdmin: boolean }).isAdmin).toBe(true);
+  });
+});
