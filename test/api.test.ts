@@ -372,3 +372,53 @@ describe("isAdmin flag", () => {
     expect((await res.json() as { isAdmin: boolean }).isAdmin).toBe(true);
   });
 });
+
+describe("change-password", () => {
+  it("401 without cookie", async () => {
+    const res = await handleApi(
+      post("/api/change-password", { current_password: "password123", new_password: "newpassword456" }),
+      env, new URL("http://x/api/change-password"), NOW,
+    );
+    expect(res.status).toBe(401);
+  });
+
+  it("400 invalid_credentials when current password is wrong", async () => {
+    const cookie = await register("alice", "password123");
+    const res = await handleApi(
+      post("/api/change-password", { current_password: "wrongpass99", new_password: "newpassword456" }, cookie),
+      env, new URL("http://x/api/change-password"), NOW,
+    );
+    expect(res.status).toBe(400);
+    expect((await res.json() as { error: string }).error).toBe("invalid_credentials");
+  });
+
+  it("400 invalid_password when new password is too short", async () => {
+    const cookie = await register("alice", "password123");
+    const res = await handleApi(
+      post("/api/change-password", { current_password: "password123", new_password: "short" }, cookie),
+      env, new URL("http://x/api/change-password"), NOW,
+    );
+    expect(res.status).toBe(400);
+    expect((await res.json() as { error: string }).error).toBe("invalid_password");
+  });
+
+  it("changes the password so the new one logs in and the old one fails", async () => {
+    const cookie = await register("alice", "password123");
+    const res = await handleApi(
+      post("/api/change-password", { current_password: "password123", new_password: "newpassword456" }, cookie),
+      env, new URL("http://x/api/change-password"), NOW,
+    );
+    expect(res.status).toBe(200);
+
+    const good = await handleApi(
+      post("/api/login", { username: "alice", password: "newpassword456" }),
+      env, new URL("http://x/api/login"), NOW,
+    );
+    expect(good.status).toBe(200);
+    const bad = await handleApi(
+      post("/api/login", { username: "alice", password: "password123" }),
+      env, new URL("http://x/api/login"), NOW,
+    );
+    expect(bad.status).toBe(401);
+  });
+});

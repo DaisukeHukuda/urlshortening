@@ -3,6 +3,7 @@ import {
   buildSetCookie,
   clearCookie,
   createSession,
+  hashPassword,
   readCookie,
   verifyPassword,
   verifySession,
@@ -19,7 +20,14 @@ import {
 } from "./links";
 import { getStats } from "./stats";
 import type { Env } from "./types";
-import { createUser, getUserByUsername, UserError } from "./users";
+import {
+  createUser,
+  getUserById,
+  getUserByUsername,
+  updateUserPassword,
+  UserError,
+  validatePassword,
+} from "./users";
 
 const SESSION_TTL = 1000 * 60 * 60 * 24 * 7; // 7 days
 
@@ -117,6 +125,31 @@ export async function handleApi(
       user: { id: session.userId, username: session.username },
       isAdmin: isAdmin(session, env),
     });
+  }
+
+  if (path === "/api/change-password" && req.method === "POST") {
+    const body = (await req.json().catch(() => ({}))) as {
+      current_password?: string;
+      new_password?: string;
+    };
+    const user = await getUserById(env.DB, session.userId);
+    if (!user) {
+      return json({ error: "unauthorized" }, 401);
+    }
+    const ok = await verifyPassword(
+      body.current_password ?? "",
+      user.password_salt,
+      user.password_hash,
+    );
+    if (!ok) {
+      return json({ error: "invalid_credentials" }, 400);
+    }
+    if (!validatePassword(body.new_password ?? "")) {
+      return json({ error: "invalid_password" }, 400);
+    }
+    const { salt, hash } = await hashPassword(body.new_password ?? "");
+    await updateUserPassword(env.DB, session.userId, hash, salt);
+    return json({ ok: true });
   }
 
   if (path === "/api/links" && req.method === "GET") {
