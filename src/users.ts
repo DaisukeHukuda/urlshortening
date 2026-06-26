@@ -68,3 +68,58 @@ export async function getUserByUsername(
     .first<UserRow>();
   return row ?? null;
 }
+
+export interface UserSummary {
+  id: number;
+  username: string;
+  created_at: number;
+  link_count: number;
+}
+
+export async function listUsers(db: D1Database): Promise<UserSummary[]> {
+  const { results } = await db
+    .prepare(
+      `SELECT u.id AS id, u.username AS username, u.created_at AS created_at,
+              COUNT(l.code) AS link_count
+       FROM users u
+       LEFT JOIN links l ON l.user_id = u.id
+       GROUP BY u.id
+       ORDER BY u.created_at ASC, u.id ASC`,
+    )
+    .all<UserSummary>();
+  return results ?? [];
+}
+
+export async function getUserById(
+  db: D1Database,
+  id: number,
+): Promise<UserRow | null> {
+  const row = await db
+    .prepare(
+      "SELECT id, username, password_hash, password_salt, created_at FROM users WHERE id = ?",
+    )
+    .bind(id)
+    .first<UserRow>();
+  return row ?? null;
+}
+
+export async function updateUserPassword(
+  db: D1Database,
+  userId: number,
+  hash: string,
+  salt: string,
+): Promise<void> {
+  await db
+    .prepare("UPDATE users SET password_hash = ?, password_salt = ? WHERE id = ?")
+    .bind(hash, salt, userId)
+    .run();
+}
+
+// Excludes ambiguous chars (0/O/1/l/I) for easy manual relay.
+const TEMP_ALPHABET = "ABCDEFGHJKMNPQRSTUVWXYZabcdefghjkmnpqrstuvwxyz23456789";
+export function generateTempPassword(len = 12): string {
+  const bytes = crypto.getRandomValues(new Uint8Array(len));
+  let out = "";
+  for (let i = 0; i < len; i++) out += TEMP_ALPHABET[bytes[i] % TEMP_ALPHABET.length];
+  return out;
+}
