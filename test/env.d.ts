@@ -11,6 +11,7 @@ declare global {
       DB: D1Database;
       ASSETS: Fetcher;
       AUTH_SECRET: string;
+      ADMIN_USERNAMES: string;
       TEST_MIGRATIONS: D1Migration[];
     }
   }

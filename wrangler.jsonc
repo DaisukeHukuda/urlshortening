@@ -14,5 +14,8 @@
       "database_id": "775a89d6-ef30-41c0-99c0-36ecb9dc9cdd",
       "migrations_dir": "migrations"
     }
-  ]
+  ],
+  "vars": {
+    "ADMIN_USERNAMES": "admin"
+  }
 }
