@@ -392,12 +392,15 @@ input[type="datetime-local"].input::-webkit-calendar-picker-indicator {
   box-shadow: var(--shadow-soft);
   overflow: hidden;
 }
-.table { width: 100%; border-collapse: collapse; table-layout: fixed; }
-/* fixed column widths so the actions column can never be pushed out / clipped */
-.table th:nth-child(1), .table td:nth-child(1) { width: 26%; }
-.table th:nth-child(3), .table td:nth-child(3) { width: 104px; }
-.table th:nth-child(4), .table td:nth-child(4) { width: 80px; }
-.table th:nth-child(5), .table td:nth-child(5) { width: 232px; }
+.table { width: 100%; border-collapse: collapse; }
+/* Links table only: fixed column widths so the actions column can never be
+   pushed out / clipped. Scoped to #view-list so it doesn't affect the admin
+   table (which sizes to content). */
+#view-list .table { table-layout: fixed; }
+#view-list .table th:nth-child(1), #view-list .table td:nth-child(1) { width: 26%; }
+#view-list .table th:nth-child(3), #view-list .table td:nth-child(3) { width: 104px; }
+#view-list .table th:nth-child(4), #view-list .table td:nth-child(4) { width: 80px; }
+#view-list .table th:nth-child(5), #view-list .table td:nth-child(5) { width: 232px; }
 /* column 2 (リンク先URL) takes the remaining space and truncates */
 .table thead th {
   text-align: left;
