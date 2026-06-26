@@ -22,8 +22,10 @@ import { getStats } from "./stats";
 import type { Env } from "./types";
 import {
   createUser,
+  generateTempPassword,
   getUserById,
   getUserByUsername,
+  listUsers,
   updateUserPassword,
   UserError,
   validatePassword,
@@ -150,6 +152,36 @@ export async function handleApi(
     const { salt, hash } = await hashPassword(body.new_password ?? "");
     await updateUserPassword(env.DB, session.userId, hash, salt);
     return json({ ok: true });
+  }
+
+  if (path === "/api/admin/users" && req.method === "GET") {
+    if (!isAdmin(session, env)) {
+      return json({ error: "forbidden" }, 403);
+    }
+    return json({ users: await listUsers(env.DB) });
+  }
+
+  if (
+    path.startsWith("/api/admin/users/") &&
+    path.endsWith("/reset") &&
+    req.method === "POST"
+  ) {
+    if (!isAdmin(session, env)) {
+      return json({ error: "forbidden" }, 403);
+    }
+    const idStr = path.slice("/api/admin/users/".length, -"/reset".length);
+    const id = Number(idStr);
+    if (!Number.isInteger(id) || id <= 0) {
+      return json({ error: "not found" }, 404);
+    }
+    const target = await getUserById(env.DB, id);
+    if (!target) {
+      return json({ error: "not found" }, 404);
+    }
+    const tempPassword = generateTempPassword();
+    const { salt, hash } = await hashPassword(tempPassword);
+    await updateUserPassword(env.DB, id, hash, salt);
+    return json({ temp_password: tempPassword });
   }
 
   if (path === "/api/links" && req.method === "GET") {

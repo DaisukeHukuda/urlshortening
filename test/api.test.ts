@@ -422,3 +422,55 @@ describe("change-password", () => {
     expect(bad.status).toBe(401);
   });
 });
+
+describe("admin endpoints", () => {
+  it("403 for non-admin on GET /api/admin/users and reset", async () => {
+    const userCookie = await register("alice", "password123");
+    const list = await handleApi(get("/api/admin/users", userCookie), env, new URL("http://x/api/admin/users"), NOW);
+    expect(list.status).toBe(403);
+    const reset = await handleApi(
+      post("/api/admin/users/1/reset", {}, userCookie),
+      env, new URL("http://x/api/admin/users/1/reset"), NOW,
+    );
+    expect(reset.status).toBe(403);
+  });
+
+  it("admin lists users and resets a password to a working temp password", async () => {
+    const adminCookie = await register("admin", "password123");
+    await register("alice", "password123");
+
+    const listRes = await handleApi(get("/api/admin/users", adminCookie), env, new URL("http://x/api/admin/users"), NOW);
+    expect(listRes.status).toBe(200);
+    const { users } = (await listRes.json()) as { users: { id: number; username: string }[] };
+    const alice = users.find((u) => u.username === "alice")!;
+    expect(alice).toBeDefined();
+
+    const resetRes = await handleApi(
+      post(`/api/admin/users/${alice.id}/reset`, {}, adminCookie),
+      env, new URL(`http://x/api/admin/users/${alice.id}/reset`), NOW,
+    );
+    expect(resetRes.status).toBe(200);
+    const { temp_password } = (await resetRes.json()) as { temp_password: string };
+    expect(temp_password.length).toBeGreaterThanOrEqual(8);
+
+    const good = await handleApi(
+      post("/api/login", { username: "alice", password: temp_password }),
+      env, new URL("http://x/api/login"), NOW,
+    );
+    expect(good.status).toBe(200);
+    const bad = await handleApi(
+      post("/api/login", { username: "alice", password: "password123" }),
+      env, new URL("http://x/api/login"), NOW,
+    );
+    expect(bad.status).toBe(401);
+  });
+
+  it("404 when resetting a non-existent user", async () => {
+    const adminCookie = await register("admin", "password123");
+    const res = await handleApi(
+      post("/api/admin/users/999999/reset", {}, adminCookie),
+      env, new URL("http://x/api/admin/users/999999/reset"), NOW,
+    );
+    expect(res.status).toBe(404);
+  });
+});
