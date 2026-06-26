@@ -17,7 +17,7 @@
         </a>
         <div class="appbar__spacer"></div>
         <div class="appbar__meta" id="appbar-host"></div>
-        <div class="appbar__user" id="appbar-user" hidden><span class="appbar__username" id="appbar-username"></span><button class="iconbtn" type="button" data-act="logout">ログアウト</button></div>
+        <div class="appbar__user" id="appbar-user" hidden><span class="appbar__username" id="appbar-username"></span><button class="iconbtn" type="button" data-act="admin" id="appbar-admin" hidden>ユーザー管理</button><button class="iconbtn" type="button" data-act="change-password">パスワード変更</button><button class="iconbtn" type="button" data-act="logout">ログアウト</button></div>
       </header>
 
       <main class="page" id="page">
@@ -175,6 +175,59 @@
             </div>
           </form>
         </section>
+
+        <!-- ============ ADMIN VIEW ============ -->
+        <section id="view-admin" hidden>
+          <button class="backlink" type="button" data-act="back-list"><span data-icon="back"></span>一覧に戻る</button>
+          <div class="page__head" style="margin-bottom: 20px">
+            <h1 class="page__title">ユーザー管理</h1>
+            <p class="page__sub" id="admin-count"></p>
+          </div>
+          <div class="tablewrap table-only-pc">
+            <table class="table">
+              <thead>
+                <tr><th>ユーザーID</th><th>登録日</th><th class="num">リンク数</th><th class="col-actions">操作</th></tr>
+              </thead>
+              <tbody id="admin-tbody"></tbody>
+            </table>
+          </div>
+          <div class="cardlist" id="admin-cards"></div>
+        </section>
+
+        <!-- ============ CHANGE PASSWORD VIEW ============ -->
+        <section id="view-change-password" hidden>
+          <button class="backlink" type="button" data-act="back-list"><span data-icon="back"></span>一覧に戻る</button>
+          <div class="page__head" style="margin-bottom: 24px"><h1 class="page__title">パスワード変更</h1></div>
+          <form class="card createform" id="cp-form" novalidate style="max-width: 460px">
+            <div class="formgrid" style="grid-template-columns:1fr;gap:18px">
+              <div class="field">
+                <label class="label" for="cp-current">現在のパスワード<span class="req">必須</span></label>
+                <input class="input" id="cp-current" type="password" autocomplete="current-password" required />
+              </div>
+              <div class="field">
+                <label class="label" for="cp-new">新しいパスワード<span class="req">必須</span></label>
+                <div class="input-affix">
+                  <input class="input" id="cp-new" type="password" autocomplete="new-password" required />
+                  <button type="button" class="affix-btn" data-act="cp-toggle" aria-label="パスワードを表示"><span data-icon="eye"></span></button>
+                </div>
+                <span class="hint">8文字以上</span>
+              </div>
+            </div>
+            <div class="form-error" id="cp-error" hidden><span data-icon="alert"></span><span class="form-error__msg"></span></div>
+            <div class="form-actions" style="margin-top:24px"><button type="submit" class="btn btn--primary">変更する</button></div>
+          </form>
+        </section>
+
+        <!-- ============ TEMP PASSWORD MODAL ============ -->
+        <div class="modal-overlay" id="temp-modal" hidden>
+          <div class="modal">
+            <button class="modal__close" type="button" data-act="temp-close"><span data-icon="close"></span></button>
+            <div class="modal__label">仮パスワード</div>
+            <div class="modal__url" id="temp-user"></div>
+            <div class="cellurl" style="justify-content:center;margin:12px 0"><span class="shorturl__code" id="temp-pass" style="font-size:18px"></span><button class="copybtn" type="button" data-act="temp-copy" aria-label="仮パスワードをコピー"><span data-icon="copy"></span></button></div>
+            <div class="modal__hint">この仮パスワードを本人に伝えてください。本人はログイン後「パスワード変更」で自分のパスワードに変更できます。</div>
+          </div>
+        </div>
       </main>
     </div>
 

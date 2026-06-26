@@ -752,3 +752,6 @@ html, body { overflow-x: hidden; }
   .appbar__name { display: none; }
   .appbar__username { max-width: 150px; }
 }
+
+.appbar__user { display: flex; align-items: center; gap: 8px; }
+#view-admin .table .col-actions .iconbtn { padding: 7px 12px; }

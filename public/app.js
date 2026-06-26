@@ -74,7 +74,7 @@
   /* ---- view switching ------------------------------------------------- */
   var page = $("page");
   function showView(name) {
-    ["auth", "list", "stats", "edit"].forEach(function (v) {
+    ["auth", "list", "stats", "edit", "admin", "change-password"].forEach(function (v) {
       $("view-" + v).hidden = v !== name;
     });
     page.classList.toggle("page--narrow", name === "edit");
@@ -84,15 +84,18 @@
   /* ---- auth state ----------------------------------------------------- */
   var authMode = "login";
 
-  function setAuthed(user) {
+  function setAuthed(data) {
+    var user = data.user || data;
     $("appbar-user").hidden = false;
     $("appbar-username").textContent = user.username;
+    $("appbar-admin").hidden = !data.isAdmin;
     showView("list");
     loadLinks();
   }
 
   function setLoggedOut() {
     $("appbar-user").hidden = true;
+    $("appbar-admin").hidden = true;
     setAuthMode("login");
     showView("auth");
   }
@@ -343,6 +346,63 @@
     );
   }
 
+  /* ---- admin: user management ---------------------------------------- */
+  function fmtDate(ms) {
+    var d = new Date(ms);
+    var p = function (n) { return String(n).padStart(2, "0"); };
+    return d.getFullYear() + "/" + p(d.getMonth() + 1) + "/" + p(d.getDate());
+  }
+  function loadAdminUsers() {
+    return fetch("/api/admin/users").then(function (r) {
+      if (r.status === 403) { showView("list"); return null; }
+      return r.ok ? r.json() : null;
+    }).then(function (data) {
+      if (!data) return;
+      var users = data.users || [];
+      $("admin-count").textContent = users.length + " 人のユーザー";
+      $("admin-tbody").innerHTML = users.map(function (u) {
+        return "<tr><td><span class=\"shorturl__code\">" + esc(u.username) + "</span></td>" +
+          "<td>" + fmtDate(u.created_at) + "</td>" +
+          "<td class=\"num\">" + nf(u.link_count) + "</td>" +
+          "<td class=\"col-actions\"><button class=\"iconbtn\" data-act=\"user-reset\" data-id=\"" + u.id +
+          "\" data-username=\"" + esc(u.username) + "\">パスワードをリセット</button></td></tr>";
+      }).join("");
+      $("admin-cards").innerHTML = users.map(function (u) {
+        return "<div class=\"linkcard\"><div class=\"linkcard__top\"><div class=\"linkcard__row\"><span class=\"shorturl__code\">" +
+          esc(u.username) + "</span><div class=\"row-title\">登録 " + fmtDate(u.created_at) + "・リンク " + nf(u.link_count) +
+          "</div></div></div><div class=\"linkcard__actions\"><button class=\"iconbtn\" data-act=\"user-reset\" data-id=\"" +
+          u.id + "\" data-username=\"" + esc(u.username) + "\">パスワードをリセット</button></div></div>";
+      }).join("");
+    });
+  }
+  function showAdmin() { loadAdminUsers().then(function () { showView("admin"); }); }
+
+  var tempModal = $("temp-modal");
+  function resetUserPassword(id, username) {
+    if (!confirm(username + " のパスワードを仮パスワードにリセットしますか？")) return;
+    fetch("/api/admin/users/" + encodeURIComponent(id) + "/reset", { method: "POST" })
+      .then(function (r) { return r.ok ? r.json() : null; })
+      .then(function (data) {
+        if (!data) { alert("リセットに失敗しました。"); return; }
+        $("temp-user").textContent = username;
+        $("temp-pass").textContent = data.temp_password;
+        tempModal.hidden = false;
+      });
+  }
+  function closeTemp() { tempModal.hidden = true; }
+
+  /* ---- change password ----------------------------------------------- */
+  function showChangePassword() {
+    $("cp-current").value = "";
+    $("cp-new").value = "";
+    clearFormError($("cp-error"));
+    showView("change-password");
+  }
+  var CP_ERR = {
+    invalid_credentials: "現在のパスワードが正しくありません。",
+    invalid_password: "新しいパスワードは8文字以上で入力してください。"
+  };
+
   /* ---- actions -------------------------------------------------------- */
   function toggleDisabled(link) {
     fetch("/api/links/" + encodeURIComponent(link.code), {
@@ -367,6 +427,7 @@
     var el = e.target.closest("[data-act]");
     if (!el) {
       if (e.target === qrModal) closeQr();
+      if (e.target === tempModal) closeTemp();
       return;
     }
     var act = el.getAttribute("data-act");
@@ -385,6 +446,17 @@
     else if (act === "auth-toggle") { setAuthMode(authMode === "login" ? "register" : "login"); }
     else if (act === "logout") { fetch("/api/logout", { method: "POST" }).then(setLoggedOut); }
     else if (act === "toggle-password") { togglePassword(el); }
+    else if (act === "admin") showAdmin();
+    else if (act === "change-password") showChangePassword();
+    else if (act === "user-reset") resetUserPassword(el.getAttribute("data-id"), el.getAttribute("data-username"));
+    else if (act === "temp-close") closeTemp();
+    else if (act === "temp-copy") { copyText($("temp-pass").textContent).then(function () { flashCopied(el, true); }, function () { flashCopied(el, false); }); }
+    else if (act === "cp-toggle") {
+      var inp = $("cp-new");
+      var show = inp.type === "password";
+      inp.type = show ? "text" : "password";
+      el.innerHTML = show ? I.eyeOff : I.eye;
+    }
   });
 
   document.addEventListener("keydown", function (e) {
@@ -479,12 +551,31 @@
     }).then(function (r) {
       return r.json().catch(function () { return {}; }).then(function (b) {
         if (r.ok) {
-          setAuthed(b.user);
+          setAuthed(b);
         } else {
           var msg = AUTH_ERR[b.error] ||
             (authMode === "login" ? "ログインに失敗しました。" : "登録に失敗しました。");
           showFormError(authErr, msg);
         }
+      });
+    });
+  });
+
+  $("cp-form").addEventListener("submit", function (e) {
+    e.preventDefault();
+    var err = $("cp-error");
+    clearFormError(err);
+    fetch("/api/change-password", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        current_password: $("cp-current").value,
+        new_password: $("cp-new").value
+      })
+    }).then(function (r) {
+      return r.json().catch(function () { return {}; }).then(function (b) {
+        if (r.ok) { alert("パスワードを変更しました。"); showView("list"); }
+        else { showFormError(err, CP_ERR[b.error] || "変更に失敗しました。"); }
       });
     });
   });
@@ -522,6 +613,6 @@
   });
   $("appbar-host").textContent = location.host;
   fetch("/api/me").then(function (r) { return r.ok ? r.json() : null; }).then(function (d) {
-    if (d && d.user) { setAuthed(d.user); } else { setLoggedOut(); }
+    if (d && d.user) { setAuthed(d); } else { setLoggedOut(); }
   });
 })();
